@@ -62,7 +62,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent pb-1">
-                        Publications Dashboard
+                        Publications Dashboard สาขาสาธารณสุขชุมชน
                     </h1>
                     <p class="text-sm text-slate-500 font-medium" id="status-text">กำลังเชื่อมต่อข้อมูล...</p>
                 </div>
@@ -166,7 +166,7 @@
         <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden relative">
             <div class="flex justify-between items-end mb-6">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800">สรุปจำนวนการตีพิมพ์ผลงานทางวิชาการ (ตามแบบฟอร์ม 2568)</h2>
+                    <h2 class="text-lg font-bold text-slate-800">สรุปจำนวนการตีพิมพ์ผลงานทางวิชาการ</h2>
                     <p class="text-sm text-slate-500 mt-1">จำนวนผลงานจัดกลุ่มตามคุณภาพวารสาร (Journal) และรายงานสืบเนื่อง (Proceeding)</p>
                 </div>
             </div>
@@ -225,12 +225,13 @@
                 </div>
             </div>
             <div class="overflow-x-auto pb-4 hide-scrollbar">
-                <table class="w-full text-left text-sm border-collapse min-w-[600px]">
+                <table class="w-full text-left text-sm border-collapse min-w-[800px]">
                     <thead>
                         <tr class="border-b-2 border-slate-200 bg-slate-50">
-                            <th class="p-3 font-bold text-slate-700 w-24 text-center">ปี (Year)</th>
-                            <th class="p-3 font-bold text-slate-700">ชื่อผลงาน (Title)</th>
-                            <th class="p-3 font-bold text-slate-700 w-1/3">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
+                            <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
+                            <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
+                            <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
+                            <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
                         </tr>
                     </thead>
                     <tbody id="author-publications-body">
@@ -287,13 +288,13 @@
 
         // ข้อมูลตัวอย่าง
         const fallbackMockData = [
-            { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"] },
-            { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์กับพฤติกรรมการเลือกซื้อเครื่องสำอาง", pub_name: "วารสารสาธารณสุขและวิทยาศาสตร์สุขภาพ", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"] },
-            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"] },
-            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"] },
-            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญาของนักเรียน", pub_name: "วารสารอนามัยสิ่งแวดล้อม และสุขภาพชุมชน", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"] },
-            { author: "DC", year_be: 2567, title: "Associated factors of non-recurrence stroke", pub_name: "International Journal of Pubilc Health Science", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"] },
-            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุนที่มีผลต่อการปฏิบัติงาน", pub_name: "วารสารมหาวิทยาลัยคริสเตียน", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"] }
+            { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028" },
+            { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์กับพฤติกรรมการเลือกซื้อเครื่องสำอาง", pub_name: "วารสารสาธารณสุขและวิทยาศาสตร์สุขภาพ", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"], citation: "-", urlDoi: "" },
+            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"], citation: "-", urlDoi: "" },
+            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"], citation: "-", urlDoi: "" },
+            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญาของนักเรียน", pub_name: "วารสารอนามัยสิ่งแวดล้อม และสุขภาพชุมชน", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"], citation: "-", urlDoi: "" },
+            { author: "DC", year_be: 2567, title: "Associated factors of non-recurrence stroke", pub_name: "International Journal of Pubilc Health Science", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"], citation: "-", urlDoi: "" },
+            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุนที่มีผลต่อการปฏิบัติงาน", pub_name: "วารสารมหาวิทยาลัยคริสเตียน", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"], citation: "-", urlDoi: "" }
         ];
 
         function parseCSV(str) {
@@ -358,7 +359,9 @@
                         type: d.pub_type || '',
                         level: d.journal_type || 'National',
                         tier: d.tier || 'NA',
-                        keywords: cleanedKeywords
+                        keywords: cleanedKeywords,
+                        citation: d.citation || '',
+                        urlDoi: d['url-doi'] || d.url_doi || d.url || ''
                     };
                 });
 
@@ -743,7 +746,7 @@
             tbody.innerHTML = '';
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลผลงาน</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลผลงาน</td></tr>';
                 return;
             }
 
@@ -754,17 +757,31 @@
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-slate-100 last:border-none hover:bg-slate-50/70 transition-colors";
                 
+                let linkHtml = '';
+                if (row.urlDoi && row.urlDoi.trim() !== '') {
+                    let url = row.urlDoi.trim();
+                    if(!url.startsWith('http')) url = 'https://' + url;
+                    linkHtml = `<a href="${url}" target="_blank" class="text-blue-500 hover:text-blue-700 underline text-xs break-all flex items-center gap-1 mt-2 w-fit"><i data-lucide="external-link" class="w-3 h-3"></i> DOI / Link</a>`;
+                }
+
                 tr.innerHTML = `
                     <td class="p-4 text-center text-slate-700 font-bold align-top bg-slate-50/30">${row.year_be}</td>
                     <td class="p-4 text-slate-800 font-medium align-top leading-relaxed pr-6">${row.title}</td>
-                    <td class="p-4 align-top leading-relaxed">
-                        <span class="bg-indigo-50 border border-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-semibold inline-block">
+                    <td class="p-4 align-top leading-relaxed pr-4">
+                        <span class="bg-indigo-50 border border-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-semibold inline-block mb-1">
                             ${row.pub_name || '-'}
                         </span>
+                    </td>
+                    <td class="p-4 align-top leading-relaxed text-sm text-slate-600">
+                        <div class="line-clamp-4" title="${row.citation || ''}">${row.citation || '-'}</div>
+                        ${linkHtml}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+            
+            // อัปเดตไอคอนลิงก์ใหม่
+            lucide.createIcons();
         }
 
         function renderWordCloud(authorData) {
