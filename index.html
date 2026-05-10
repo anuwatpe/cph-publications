@@ -10,8 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- WordCloud2.js สำหรับสร้าง Word Cloud -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
-    <!-- Vis Network สำหรับสร้าง Network Analysis -->
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -312,22 +310,6 @@
             </div>
         </div>
 
-        <!-- Network Analysis Section (NEW) -->
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-12">
-            <div class="flex justify-between items-end mb-6">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-800">เครือข่ายบรรณานุกรม (Bibliometric Network Analysis)</h2>
-                    <p id="network-subtitle" class="text-sm text-slate-500 mt-1">เครือข่ายความสัมพันธ์ของคำสำคัญที่ใช้ร่วมกันในงานวิจัย (Keyword Co-occurrence)</p>
-                </div>
-            </div>
-            
-            <!-- Container สำหรับ Network -->
-            <div id="network-container" class="w-full flex justify-center items-center h-[500px] relative bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-inner">
-                <!-- กราฟเครือข่ายจะถูกวาดที่นี่ -->
-            </div>
-            <p class="text-xs text-slate-400 mt-3 text-center">* สามารถใช้เมาส์ซูมเข้า-ออก หรือลากจุด (Node) เพื่อดูความสัมพันธ์ที่ชัดเจนขึ้นได้</p>
-        </div>
-
     </div>
 
     <script>
@@ -357,7 +339,6 @@
         
         let trendChartInstance = null;
         let donutChartInstance = null;
-        let networkInstance = null; // เก็บ Instance ของกราฟเครือข่าย
 
         // ข้อมูลตัวอย่าง (Mock Data เพิ่มฟิลด์ email และ profileImage)
         const fallbackMockData = [
@@ -665,19 +646,15 @@
                     : globalData.filter(d => d.author === selectedAuthor);
                 
                 renderWordCloud(wordCloudData);
-                renderNetwork(wordCloudData); // เรียกวาด Network Graph
                 lastWordCloudAuthor = selectedAuthor;
 
-                // เปลี่ยนข้อความ Subtitle ของกล่อง Word Cloud และ Network
+                // เปลี่ยนข้อความ Subtitle ของกล่อง Word Cloud เพื่อบอกผู้ใช้ว่ากำลังดูของใครอยู่
                 const wcSubtitle = document.getElementById('wordcloud-subtitle');
-                const netSubtitle = document.getElementById('network-subtitle');
-                if (wcSubtitle && netSubtitle) {
+                if (wcSubtitle) {
                     if (selectedAuthor === 'All') {
                         wcSubtitle.textContent = 'คำสำคัญที่ถูกใช้ในงานวิจัย (ภาพรวมของทุกคนในทุกปีการศึกษา)';
-                        netSubtitle.textContent = 'เครือข่ายคำสำคัญที่ใช้ร่วมกันบ่อยที่สุด (ภาพรวมของทุกคน)';
                     } else {
                         wcSubtitle.textContent = `คำสำคัญที่ถูกใช้ในงานวิจัยของ: ${selectedAuthor} (รวมทุกปีการศึกษา)`;
-                        netSubtitle.textContent = `เครือข่ายคำสำคัญที่ใช้ร่วมกันในงานวิจัยของ: ${selectedAuthor}`;
                     }
                 }
             }
@@ -1011,115 +988,6 @@
                 shrinkToFit: true,
                 drawOutOfBound: false
             });
-        }
-
-        // ฟังก์ชันวาดเครือข่าย Bibliometric Network (Keyword Co-occurrence)
-        function renderNetwork(authorData) {
-            const keywordFreq = {};
-            const edgeMap = {};
-
-            // 1. นับความถี่ของคำและการใช้ร่วมกัน (Co-occurrence)
-            authorData.forEach(d => {
-                if (d.keywords && d.keywords.length > 0) {
-                    const kws = d.keywords;
-                    
-                    kws.forEach(kw => {
-                        keywordFreq[kw] = (keywordFreq[kw] || 0) + 1;
-                    });
-
-                    // จับคู่คำสำคัญที่อยู่ในเปเปอร์เดียวกัน
-                    for (let i = 0; i < kws.length; i++) {
-                        for (let j = i + 1; j < kws.length; j++) {
-                            const kw1 = kws[i];
-                            const kw2 = kws[j];
-                            if (kw1 !== kw2) {
-                                // เรียงตัวอักษรเพื่อไม่ให้สลับ A-B กับ B-A
-                                const edgeKey = [kw1, kw2].sort().join('|||');
-                                edgeMap[edgeKey] = (edgeMap[edgeKey] || 0) + 1;
-                            }
-                        }
-                    }
-                }
-            });
-
-            // 2. คัดกรอง Top 30 Keywords เพื่อไม่ให้กราฟรกจนเกินไป (Hairball)
-            let topKeywords = Object.entries(keywordFreq)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 30)
-                .map(e => e[0]);
-
-            const validNodes = new Set(topKeywords);
-            const container = document.getElementById('network-container');
-
-            if (topKeywords.length === 0) {
-                container.innerHTML = '<div class="text-slate-400 font-medium">ไม่มีข้อมูลเพียงพอสำหรับสร้างเครือข่ายความสัมพันธ์</div>';
-                return;
-            } else {
-                container.innerHTML = ''; // ลบข้อความแจ้งเตือน
-            }
-
-            // 3. สร้าง Nodes
-            // สร้าง Color Palette สำหรับจัดกลุ่ม
-            const colorPalette = ['#6366f1', '#10b981', '#f59e0b', '#0ea5e9', '#ec4899'];
-            
-            const nodes = topKeywords.map((kw, index) => {
-                return {
-                    id: kw,
-                    label: kw,
-                    value: keywordFreq[kw], // ขนาดของโหนดตามความถี่
-                    title: `<b>${kw}</b><br>พบในงานวิจัย: ${keywordFreq[kw]} เรื่อง`,
-                    color: {
-                        background: colorPalette[index % colorPalette.length],
-                        border: '#ffffff',
-                        highlight: { background: '#f43f5e', border: '#ffffff' }
-                    }
-                };
-            });
-
-            // 4. สร้าง Edges (เส้นเชื่อม)
-            const edges = [];
-            Object.entries(edgeMap).forEach(([edgeKey, weight]) => {
-                const [kw1, kw2] = edgeKey.split('|||');
-                if (validNodes.has(kw1) && validNodes.has(kw2)) {
-                    edges.push({
-                        from: kw1,
-                        to: kw2,
-                        value: weight, // ความหนาของเส้นตามความถี่ที่เกิดร่วมกัน
-                        title: `ใช้คู่กัน: ${weight} ครั้ง`,
-                        color: { color: 'rgba(148, 163, 184, 0.4)', highlight: '#f43f5e' } // เส้นปกติสีเทาจาง ไฮไลต์สีชมพูเข้ม
-                    });
-                }
-            });
-
-            // 5. ตั้งค่าตัวเลือกของกราฟ
-            const data = { nodes: nodes, edges: edges };
-            const options = {
-                nodes: {
-                    shape: 'dot',
-                    scaling: { min: 10, max: 40 },
-                    font: { size: 14, face: 'Sarabun', color: '#334155', strokeWidth: 3, strokeColor: '#ffffff' },
-                    borderWidth: 2,
-                    shadow: true
-                },
-                edges: {
-                    smooth: { type: 'continuous' }
-                },
-                physics: {
-                    barnesHut: { gravitationalConstant: -3000, centralGravity: 0.3, springLength: 150 },
-                    stabilization: { iterations: 150 }
-                },
-                interaction: { 
-                    hover: true, 
-                    tooltipDelay: 100,
-                    zoomView: true
-                }
-            };
-
-            // 6. วาดกราฟ
-            if (networkInstance) {
-                networkInstance.destroy();
-            }
-            networkInstance = new vis.Network(container, data, options);
         }
 
         // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
