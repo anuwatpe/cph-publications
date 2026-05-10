@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Publication Dashboard สาขาวิชาสาธารณสุขชุมชน</title>
+    <title>Publication Dashboard</title>
     <!-- Tailwind CSS สำหรับการจัดหน้า -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js สำหรับวาดกราฟ -->
@@ -62,17 +62,29 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent pb-1">
-                        Publications Dashboard สาขาวิชาสาธารณสุขชุมชน
+                        Publications Dashboard
                     </h1>
                     <p class="text-sm text-slate-500 font-medium" id="status-text">กำลังเชื่อมต่อข้อมูล...</p>
                 </div>
             </div>
 
-            <!-- Multi-select Year Filters (Pill Buttons) -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-3">
-                <span class="text-sm font-bold text-slate-700">เลือกปีการศึกษา (คลิกเพื่อเลือกหลายปี):</span>
-                <div class="flex items-center gap-2 flex-wrap" id="year-filter-container">
-                    <!-- ปุ่มเลือกปีจะถูกใส่เข้ามาด้วย Javascript -->
+            <!-- Filter Section -->
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Multi-select Year Filters (Pill Buttons) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex-1 flex flex-col gap-3">
+                    <span class="text-sm font-bold text-slate-700">เลือกปีการศึกษา (คลิกเพื่อเลือกหลายปี):</span>
+                    <div class="flex items-center gap-2 flex-wrap" id="year-filter-container">
+                        <!-- ปุ่มเลือกปีจะถูกใส่เข้ามาด้วย Javascript -->
+                    </div>
+                </div>
+
+                <!-- Author Filter (Dropdown) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 lg:w-1/3 flex flex-col gap-3">
+                    <span class="text-sm font-bold text-slate-700">เลือกบุคลากร (รายบุคคล):</span>
+                    <select id="authorSelect" class="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium cursor-pointer transition-colors hover:bg-slate-100">
+                        <option value="All">บุคลากรทุกคน</option>
+                        <!-- ชื่อบุคลากรจะถูกใส่เข้ามาด้วย Javascript -->
+                    </select>
                 </div>
             </div>
         </div>
@@ -154,8 +166,8 @@
         <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden relative">
             <div class="flex justify-between items-end mb-6">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800">สรุปจำนวนการตีพิมพ์ผลงานทางวิชาการ</h2>
-                    <p class="text-sm text-slate-500 mt-1">จำนวนผลงานจัดกลุ่มตามคุณภาพวารสาร</p>
+                    <h2 class="text-lg font-bold text-slate-800">สรุปจำนวนการตีพิมพ์ผลงานทางวิชาการ (ตามแบบฟอร์ม 2568)</h2>
+                    <p class="text-sm text-slate-500 mt-1">จำนวนผลงานจัดกลุ่มตามคุณภาพวารสาร (Journal) และรายงานสืบเนื่อง (Proceeding)</p>
                 </div>
             </div>
             
@@ -209,7 +221,7 @@
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
-                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยทั้งหมด (คำนวณจากภาพรวมทุกปีการศึกษา)</p>
+                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยทั้งหมด (คำนวณจากภาพรวมทุกปีและทุกคน)</p>
                 </div>
             </div>
             
@@ -243,18 +255,19 @@
         
         let globalData = [];
         let selectedYears = new Set(); 
+        let selectedAuthor = 'All'; // ตัวแปรเก็บผู้แต่งที่ถูกเลือก
         let trendChartInstance = null;
         let donutChartInstance = null;
 
         // ข้อมูลตัวอย่าง
         const fallbackMockData = [
-            { year_be: 2563, title: "Risk factors for...", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"] },
-            { year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์...", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"] },
-            { year_be: 2565, title: "Ontology Representation...", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"] },
-            { year_be: 2566, title: "Health literacy and non-recurrence...", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"] },
-            { year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญา...", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"] },
-            { year_be: 2567, title: "Associated factors of...", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"] },
-            { year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุน...", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"] }
+            { author: "AP", year_be: 2563, title: "Risk factors for...", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"] },
+            { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์...", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"] },
+            { author: "AP", year_be: 2565, title: "Ontology Representation...", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"] },
+            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence...", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"] },
+            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญา...", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"] },
+            { author: "DC", year_be: 2567, title: "Associated factors of...", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"] },
+            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุน...", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"] }
         ];
 
         function parseCSV(str) {
@@ -307,8 +320,12 @@
                     const cleanedKeywords = rawKeywords
                         .filter(k => k && k.trim() !== '')
                         .map(k => k.trim().toLowerCase());
+                    
+                    // ดึงชื่อผู้แต่งจากคอลัมน์ name หรือ ชื่อ - สกุล
+                    const authorName = d.name || d.Name || d['ชื่อ - สกุล'] || d.author || 'ไม่ระบุชื่อ';
 
                     return {
+                        author: authorName,
                         year_be: parseInt(d.year_be) || 0,
                         title: d.Title || '',
                         type: d.pub_type || '',
@@ -334,6 +351,7 @@
                 globalData = fallbackMockData;
             } finally {
                 renderYearFilters();
+                renderAuthorFilter(); // สั่งเรนเดอร์ Dropdown ผู้แต่ง
                 updateDashboard(); // อัปเดต Filter, กราฟสถิติ, ตาราง
                 
                 // วาด Word Cloud ครั้งเดียวตอนเปิดโหลดเว็บ โดยใช้ข้อมูลทั้งหมด (globalData) เสมอ
@@ -383,10 +401,35 @@
             });
         }
 
+        // ฟังก์ชันสำหรับสร้าง Dropdown เลือกผู้แต่ง
+        function renderAuthorFilter() {
+            const select = document.getElementById('authorSelect');
+            select.innerHTML = '<option value="All">บุคลากรทุกคน</option>';
+            
+            // ดึงชื่อผู้แต่งทั้งหมดและลบค่าซ้ำ
+            const authors = Array.from(new Set(globalData.map(d => d.author).filter(a => a && a !== 'ไม่ระบุชื่อ'))).sort();
+            
+            authors.forEach(author => {
+                const opt = document.createElement('option');
+                opt.value = author;
+                opt.textContent = author;
+                select.appendChild(opt);
+            });
+
+            // เมื่อมีการเปลี่ยนชื่อ ให้เก็บค่าลงตัวแปรแล้วสั่งอัปเดต
+            select.addEventListener('change', (e) => {
+                selectedAuthor = e.target.value;
+                updateDashboard();
+            });
+        }
+
         function updateDashboard() {
-            const filteredData = selectedYears.size === 0 
-                ? globalData 
-                : globalData.filter(d => selectedYears.has(d.year_be.toString()));
+            // กรองข้อมูลด้วยเงื่อนไข "ปีที่เลือก" และ "บุคคลที่เลือก"
+            const filteredData = globalData.filter(d => {
+                const matchYear = selectedYears.size === 0 || selectedYears.has(d.year_be.toString());
+                const matchAuthor = selectedAuthor === 'All' || d.author === selectedAuthor;
+                return matchYear && matchAuthor;
+            });
 
             const total = filteredData.length;
             const international = filteredData.filter(d => d.level === 'International').length;
@@ -398,13 +441,13 @@
             document.getElementById('stat-national').textContent = national;
             document.getElementById('stat-q1q2').textContent = q1q2;
             
-            const subtitleText = selectedYears.size === 0 
-                ? 'ทุกปีการศึกษา' 
-                : `ปีการศึกษา: ${Array.from(selectedYears).sort().join(', ')}`;
-            document.getElementById('donut-subtitle').textContent = subtitleText;
+            // อัปเดต Subtitle ให้อ่านง่ายขึ้นว่ากำลังดูข้อมูลของใคร ปีอะไร
+            const yearText = selectedYears.size === 0 ? 'ทุกปีการศึกษา' : `ปี: ${Array.from(selectedYears).sort().join(', ')}`;
+            const authorText = selectedAuthor === 'All' ? 'ทุกคน' : `บุคลากร: ${selectedAuthor}`;
+            document.getElementById('donut-subtitle').textContent = `${yearText} | ${authorText}`;
 
             // --- 1. เตรียมข้อมูลกราฟแท่ง ---
-            const groupedTrend = globalData.reduce((acc, curr) => {
+            const groupedTrend = filteredData.reduce((acc, curr) => {
                 const y = curr.year_be;
                 if (!y) return acc;
                 if (!acc[y]) acc[y] = { year: y, National: 0, International: 0 };
@@ -506,7 +549,7 @@
             renderTable2568(tableRows);
 
             // หมายเหตุ: ตัดการเรนเดอร์ Word Cloud ออกจาก updateDashboard 
-            // เพื่อไม่ให้วาดใหม่เวลากดเปลี่ยนปี
+            // เพื่อไม่ให้วาดใหม่เวลากดเปลี่ยนปี หรือเปลี่ยนคน
         }
 
         function updateTrendChart(data) {
@@ -600,7 +643,7 @@
 
             const hasData = tableRows.length > 1 || (tableRows.length === 1 && tableRows[0].year !== 'รวมทั้งหมด');
             if (!hasData) {
-                tbody.innerHTML = '<tr><td colspan="15" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลสำหรับปีที่เลือก</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="15" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลสำหรับปีหรือบุคลากรที่เลือก</td></tr>';
                 return;
             }
 
@@ -656,8 +699,6 @@
 
             let wordList = Object.keys(wordCounts).map(kw => [kw, wordCounts[kw]]);
             wordList.sort((a, b) => b[1] - a[1]); 
-            
-            // ยกเลิกการตัดคำ (slice) ออก พยายามวาดทุกคำที่มี
 
             const container = document.getElementById('wordcloud-container');
             const canvas = document.getElementById('wordCloudCanvas');
@@ -694,7 +735,7 @@
                 rotateRatio: 0.2, 
                 rotationSteps: 2,
                 backgroundColor: 'transparent',
-                gridSize: 4, // ลด gridSize ให้แพ็กคำให้แน่นขึ้นเพื่อให้วาดได้ครบที่สุด
+                gridSize: 4, 
                 shrinkToFit: true,
                 drawOutOfBound: false
             });
