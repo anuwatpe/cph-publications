@@ -162,7 +162,7 @@
             </div>
         </div>
 
-        <!-- Tier Summary Table (อัปเดตตามแบบฟอร์ม 2568) -->
+        <!-- Tier Summary Table -->
         <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden relative">
             <div class="flex justify-between items-end mb-6">
                 <div>
@@ -208,7 +208,7 @@
                         </tr>
                     </thead>
                     <tbody id="table-body">
-                        <!-- ข้อมูลตารางแบบฟอร์ม 2568 จะถูกใส่เข้ามาด้วย JS -->
+                        <!-- ข้อมูลตารางแบบฟอร์มจะถูกใส่เข้ามาด้วย JS -->
                     </tbody>
                 </table>
             </div>
@@ -216,7 +216,7 @@
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden rounded-r-3xl"></div>
         </div>
 
-        <!-- Author Profile Summary (NEW) -->
+        <!-- Author Profile Summary -->
         <div id="author-profile-section" class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl text-white mt-6 hidden transition-all relative overflow-hidden">
             <!-- Background Decoration -->
             <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
@@ -713,7 +713,7 @@
             });
         }
 
-        // วาดตารางตามแบบฟอร์ม 2568
+        // วาดตารางตามแบบฟอร์ม
         function renderTable2568(tableRows) {
             const tbody = document.getElementById('table-body');
             if (!tbody) return;
