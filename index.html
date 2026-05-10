@@ -1024,22 +1024,26 @@
                 container.innerHTML = '';
             }
 
-            // จัดรูปแบบจุด Nodes
-            const nodes = topAuthors.map(author => {
+            // ชุดสี (Palette) ที่ดูสดใส หลากหลาย
+            const colorPalette = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#0ea5e9', '#f43f5e', '#14b8a6', '#6366f1'];
+
+            // จัดรูปแบบจุด Nodes ให้มีสีสัน
+            const nodes = topAuthors.map((author, index) => {
+                const nodeColor = colorPalette[index % colorPalette.length];
                 return {
                     id: author,
                     label: author,
                     value: nodeFreq[author],
                     title: `<b>${author}</b><br>ผลงานในเครือข่าย: ${nodeFreq[author]} เรื่อง`,
                     color: {
-                        background: '#10b981', // สีเขียวมรกต
+                        background: nodeColor,
                         border: '#ffffff',
-                        highlight: { background: '#f59e0b', border: '#ffffff' }
+                        highlight: { background: '#1e293b', border: nodeColor }
                     }
                 };
             });
 
-            // จัดรูปแบบเส้น Edges
+            // จัดรูปแบบเส้น Edges ให้ดูดสีจาก Node
             const edges = [];
             Object.entries(edgeMap).forEach(([edgeKey, weight]) => {
                 const [a1, a2] = edgeKey.split('|||');
@@ -1049,7 +1053,8 @@
                         to: a2,
                         value: weight, // น้ำหนักเส้นตามจำนวนเปเปอร์ที่ทำด้วยกัน
                         title: `ร่วมงานกัน: ${weight} ครั้ง`,
-                        color: { color: 'rgba(148, 163, 184, 0.5)', highlight: '#f59e0b' }
+                        // inherit: 'from' จะทำให้เส้นมีสีเดียวกับจุดเริ่มต้น ทำให้เครือข่ายดูเป็นกลุ่มก้อนสีสันสวยงาม
+                        color: { inherit: 'from', opacity: 0.7, highlight: '#1e293b' }
                     });
                 }
             });
