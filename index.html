@@ -26,13 +26,14 @@
             justify-content: center;
             align-items: center;
             z-index: 50;
+            backdrop-filter: blur(4px);
         }
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3b82f6;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #6366f1;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
@@ -47,24 +48,28 @@
     <!-- หน้าจอโหลดดิ้ง -->
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <p class="text-slate-500 font-medium">กำลังโหลดข้อมูลจาก Google Sheet...</p>
+        <p class="text-slate-600 font-semibold text-lg drop-shadow-sm">กำลังโหลดและประมวลผลข้อมูล...</p>
     </div>
 
     <div class="max-w-6xl mx-auto space-y-6">
         
         <!-- Header & Filters -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900">Publications Dashboard</h1>
-                <p class="text-sm text-slate-500" id="status-text">กำลังเชื่อมต่อข้อมูล...</p>
+        <div class="flex flex-col gap-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent pb-1">
+                        Publications Dashboard
+                    </h1>
+                    <p class="text-sm text-slate-500 font-medium" id="status-text">กำลังเชื่อมต่อข้อมูล...</p>
+                </div>
             </div>
-            
-            <div class="bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 flex items-center gap-3">
-                <span class="text-sm font-medium text-slate-500">ปีการศึกษา:</span>
-                <select id="yearSelect" class="bg-transparent border-none text-sm font-semibold text-slate-700 focus:ring-0 cursor-pointer outline-none">
-                    <option value="All">ทั้งหมด</option>
-                    <!-- ตัวเลือกปีจะถูกใส่เข้ามาด้วย Javascript -->
-                </select>
+
+            <!-- Multi-select Year Filters (Pill Buttons) -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                <span class="text-sm font-bold text-slate-700">เลือกปีการศึกษา (คลิกเพื่อเลือกหลายปี):</span>
+                <div class="flex items-center gap-2 flex-wrap" id="year-filter-container">
+                    <!-- ปุ่มเลือกปีจะถูกใส่เข้ามาด้วย Javascript -->
+                </div>
             </div>
         </div>
 
@@ -78,45 +83,45 @@
             </div>
         </div>
 
-        <!-- Stats Cards -->
+        <!-- Stats Cards (Vibrant Gradients) -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-sky-500">
-                    <i data-lucide="file-text"></i>
+            <div class="rounded-2xl p-5 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+                <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
+                    <i data-lucide="file-text" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-slate-500 font-medium">ผลงานทั้งหมด</p>
-                    <p id="stat-total" class="text-2xl font-bold text-slate-800">0</p>
+                    <p class="text-sm text-blue-100 font-medium">ผลงานทั้งหมด</p>
+                    <p id="stat-total" class="text-3xl font-extrabold">0</p>
                 </div>
             </div>
             
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-indigo-500">
-                    <i data-lucide="globe"></i>
+            <div class="rounded-2xl p-5 shadow-lg shadow-indigo-500/20 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+                <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
+                    <i data-lucide="globe" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-slate-500 font-medium">ระดับนานาชาติ</p>
-                    <p id="stat-international" class="text-2xl font-bold text-slate-800">0</p>
+                    <p class="text-sm text-indigo-100 font-medium">ระดับนานาชาติ</p>
+                    <p id="stat-international" class="text-3xl font-extrabold">0</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
-                    <i data-lucide="book-open"></i>
+            <div class="rounded-2xl p-5 shadow-lg shadow-emerald-500/20 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+                <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
+                    <i data-lucide="book-open" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-slate-500 font-medium">ระดับชาติ</p>
-                    <p id="stat-national" class="text-2xl font-bold text-slate-800">0</p>
+                    <p class="text-sm text-emerald-100 font-medium">ระดับชาติ</p>
+                    <p id="stat-national" class="text-3xl font-extrabold">0</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-amber-500">
-                    <i data-lucide="award"></i>
+            <div class="rounded-2xl p-5 shadow-lg shadow-orange-500/20 bg-gradient-to-br from-orange-400 to-pink-500 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+                <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
+                    <i data-lucide="award" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-slate-500 font-medium">Scopus Q1-Q2</p>
-                    <p id="stat-q1q2" class="text-2xl font-bold text-slate-800">0</p>
+                    <p class="text-sm text-orange-100 font-medium">Scopus Q1-Q2</p>
+                    <p id="stat-q1q2" class="text-3xl font-extrabold">0</p>
                 </div>
             </div>
         </div>
@@ -124,17 +129,17 @@
         <!-- Charts Row -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Trend Chart -->
-            <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <h2 class="text-base font-semibold mb-6 text-slate-800">แนวโน้มการตีพิมพ์แยกตามปีการศึกษา</h2>
+            <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold mb-6 text-slate-800">แนวโน้มการตีพิมพ์แยกตามปีการศึกษา</h2>
                 <div class="relative h-72 w-full">
                     <canvas id="trendChart"></canvas>
                 </div>
             </div>
 
             <!-- Donut Chart -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col">
-                <h2 class="text-base font-semibold mb-2 text-slate-800">สัดส่วนระดับการตีพิมพ์</h2>
-                <p id="donut-subtitle" class="text-xs text-slate-400 mb-4">ทุกปีการศึกษา</p>
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col">
+                <h2 class="text-lg font-bold mb-2 text-slate-800">สัดส่วนระดับการตีพิมพ์</h2>
+                <p id="donut-subtitle" class="text-sm text-indigo-500 font-medium mb-4">ทุกปีการศึกษา</p>
                 <div class="relative flex-1 min-h-[250px] w-full flex justify-center items-center">
                     <canvas id="donutChart"></canvas>
                 </div>
@@ -142,10 +147,10 @@
         </div>
 
         <!-- Tier Summary Table -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mt-6">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6">
             <div class="flex justify-between items-end mb-6">
                 <div>
-                    <h2 class="text-base font-semibold text-slate-800">สรุปการตีพิมพ์แยกตามฐานข้อมูล (Tier)</h2>
+                    <h2 class="text-lg font-bold text-slate-800">สรุปการตีพิมพ์แยกตามฐานข้อมูล (Tier)</h2>
                     <p class="text-sm text-slate-500 mt-1">จำนวนผลงานจัดกลุ่มตามคุณภาพวารสาร (ไม่รวม Q1, Q2 และ TCI)</p>
                 </div>
             </div>
@@ -153,11 +158,11 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead>
-                        <tr class="border-b border-slate-100">
-                            <th class="pb-3 font-semibold text-slate-500 uppercase tracking-wider">Tier / ฐานข้อมูล</th>
-                            <th class="pb-3 font-semibold text-slate-500 text-center">ระดับชาติ (National)</th>
-                            <th class="pb-3 font-semibold text-slate-500 text-center">นานาชาติ (International)</th>
-                            <th class="pb-3 font-semibold text-slate-800 text-right">รวมทั้งหมด</th>
+                        <tr class="border-b-2 border-slate-100">
+                            <th class="pb-3 font-bold text-slate-600 uppercase tracking-wider">Tier / ฐานข้อมูล</th>
+                            <th class="pb-3 font-bold text-slate-600 text-center">ระดับชาติ (National)</th>
+                            <th class="pb-3 font-bold text-slate-600 text-center">นานาชาติ (International)</th>
+                            <th class="pb-3 font-bold text-slate-900 text-right">รวมทั้งหมด</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -168,16 +173,16 @@
         </div>
 
         <!-- Word Cloud Section -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mt-6">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6">
             <div class="flex justify-between items-end mb-6">
                 <div>
-                    <h2 class="text-base font-semibold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
-                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยบ่อยที่สุด (Word Cloud)</p>
+                    <h2 class="text-lg font-bold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
+                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยบ่อยที่สุด (Top 70)</p>
                 </div>
             </div>
             
             <!-- Container สำหรับ Word Cloud -->
-            <div id="wordcloud-container" class="w-full flex justify-center items-center h-[350px] relative bg-slate-50/50 rounded-xl">
+            <div id="wordcloud-container" class="w-full flex justify-center items-center h-[380px] relative bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-50">
                 <canvas id="wordCloudCanvas"></canvas>
             </div>
         </div>
@@ -191,10 +196,14 @@
         // 📌 ใส่ URL CSV จาก Google Sheet ตรงนี้
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmnusNVBtnfg7R5nAs78bf4emExXYqUfokp7vr9TwL71e29j1dO4l-iJocLba4IEE1R4MoS0vh6eEE/pub?output=csv";
 
-        const LEVEL_COLORS = { 'National': '#94a3b8', 'International': '#3b82f6' };
-        const WORDCLOUD_COLORS = ['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#3b82f6', '#14b8a6', '#f43f5e'];
+        // สีใหม่ที่ดูสดใสขึ้น: ชาติ = สีเขียวมรกต, นานาชาติ = สีคราม
+        const LEVEL_COLORS = { 'National': '#10b981', 'International': '#6366f1' };
+        
+        // เพิ่มสี WordCloud ให้มีความหลากหลายและสดใส
+        const WORDCLOUD_COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#10b981', '#14b8a6', '#0ea5e9'];
         
         let globalData = [];
+        let selectedYears = new Set(); // Set สำหรับเก็บปีที่ถูกเลือก (ว่าง = เลือกทั้งหมด)
         let trendChartInstance = null;
         let donutChartInstance = null;
 
@@ -208,6 +217,19 @@
             { year_be: 2567, title: "Associated factors of...", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"] },
             { year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุน...", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก", "อาสาสมัคร"] }
         ];
+
+        // ฟังก์ชันป้องกันการทำงานซ้ำซ้อน (ลดอาการเว็บค้างตอน Resize)
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
         // ฟังก์ชันแปลง CSV Text เป็น Array of Objects
         function parseCSV(str) {
@@ -235,7 +257,7 @@
                     obj[h] = row[i] ? row[i].trim() : '';
                 });
                 return obj;
-            }).filter(d => d.Title); // กรองแถวที่ไม่มี Title ออก
+            }).filter(d => d.Title); 
         }
 
         // ดึงข้อมูลและเริ่มต้นการทำงาน
@@ -250,14 +272,12 @@
                 
                 const csvText = await response.text();
                 
-                // ตรวจสอบว่าหน้าเว็บที่ได้มาเป็นหน้า HTML (Login) แทนที่จะเป็น CSV หรือไม่
                 if (csvText.trim().startsWith("<!DOCTYPE html>")) {
                      throw new Error('Google Sheet ยังไม่ได้เปิด "เผยแพร่ทางเว็บ (Publish to web)" ระบบจึงบล็อกการเข้าถึง');
                 }
 
                 const parsedData = parseCSV(csvText);
 
-                // แปลงฟิลด์ให้ตรงกับการนำไปใช้ และดึง Keywords
                 globalData = parsedData.map(d => {
                     const rawKeywords = [d.keyword1, d.keyword2, d.keyword3, d.keyword4, d.keyword5, d.keyword6, d.keyword7];
                     const cleanedKeywords = rawKeywords
@@ -275,58 +295,76 @@
                 });
 
                 document.getElementById('status-text').textContent = "เชื่อมต่อข้อมูลแบบ Real-time สำเร็จ";
-                document.getElementById('status-text').classList.add("text-emerald-500");
+                document.getElementById('status-text').classList.add("text-emerald-600");
 
             } catch (error) {
                 console.error("Error fetching data:", error);
                 
-                // แสดงกล่อง Error
                 const errBox = document.getElementById('error-message');
                 errBox.classList.remove('hidden');
                 document.getElementById('error-text').textContent = error.message;
                 
-                // แจ้งเตือนสถานะว่ากำลังใช้ Mock Data
                 document.getElementById('status-text').textContent = "แสดงผลด้วยข้อมูลจำลอง (ระบบไม่สามารถดึงข้อมูลจริงได้)";
-                document.getElementById('status-text').classList.add("text-amber-500");
+                document.getElementById('status-text').classList.add("text-orange-500");
                 
-                // นำ Mock Data มาใช้เพื่อให้เว็บแสดงผลต่อไปได้
                 globalData = fallbackMockData;
             } finally {
-                // อัปเดต UI ไม่ว่าจะดึงข้อมูลสำเร็จหรือไม่ก็ตาม
-                setupYearFilter();
-                updateDashboard('All');
+                renderYearFilters();
+                updateDashboard();
                 
                 // ซ่อนโหลดดิ้งเมื่อเสร็จสิ้น
                 document.getElementById('loader').classList.add('hidden');
             }
         }
 
-        function setupYearFilter() {
-            const select = document.getElementById('yearSelect');
-            select.innerHTML = '<option value="All">ทั้งหมด</option>'; // Reset options
+        // สร้างปุ่มเลือกปีแบบ Multi-select
+        function renderYearFilters() {
+            const container = document.getElementById('year-filter-container');
+            container.innerHTML = ''; 
             
             const years = Array.from(new Set(globalData.map(d => d.year_be).filter(y => y > 0))).sort();
             
+            // ปุ่ม "ทั้งหมด"
+            const allBtn = document.createElement('button');
+            const isAll = selectedYears.size === 0;
+            allBtn.className = `px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 
+                ${isAll ? 'bg-slate-800 text-white shadow-md shadow-slate-400/50 scale-105' : 'bg-white text-slate-500 border-2 border-slate-100 hover:bg-slate-50 hover:border-slate-300'}`;
+            allBtn.textContent = 'ทั้งหมด';
+            allBtn.onclick = () => {
+                selectedYears.clear();
+                renderYearFilters();
+                updateDashboard();
+            };
+            container.appendChild(allBtn);
+
+            // ปุ่มแยกตามปี
             years.forEach(y => {
-                const option = document.createElement('option');
-                option.value = y;
-                option.textContent = y;
-                select.appendChild(option);
+                const btn = document.createElement('button');
+                const isSelected = selectedYears.has(y.toString());
+                
+                btn.className = `px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 
+                    ${isSelected ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/30 scale-105 border-transparent' 
+                                 : 'bg-white text-slate-500 border-2 border-slate-100 hover:bg-slate-50 hover:border-slate-300'}`;
+                btn.textContent = y;
+                
+                btn.onclick = () => {
+                    if (selectedYears.has(y.toString())) {
+                        selectedYears.delete(y.toString());
+                    } else {
+                        selectedYears.add(y.toString());
+                    }
+                    renderYearFilters();
+                    updateDashboard();
+                };
+                container.appendChild(btn);
             });
-
-            select.removeEventListener('change', handleYearChange); // ป้องกัน Event ซ้ำ
-            select.addEventListener('change', handleYearChange);
         }
 
-        function handleYearChange(e) {
-            updateDashboard(e.target.value);
-        }
-
-        function updateDashboard(selectedYear) {
-            // กรองข้อมูล
-            const filteredData = selectedYear === 'All' 
+        function updateDashboard() {
+            // กรองข้อมูลตาม Set ของปีที่เลือก (ถ้าว่างแปลว่าเลือกทั้งหมด)
+            const filteredData = selectedYears.size === 0 
                 ? globalData 
-                : globalData.filter(d => d.year_be.toString() === selectedYear);
+                : globalData.filter(d => selectedYears.has(d.year_be.toString()));
 
             // อัปเดตการ์ดสถิติ
             const total = filteredData.length;
@@ -339,7 +377,11 @@
             document.getElementById('stat-national').textContent = national;
             document.getElementById('stat-q1q2').textContent = q1q2;
             
-            document.getElementById('donut-subtitle').textContent = selectedYear === 'All' ? 'ทุกปีการศึกษา' : `ปีการศึกษา ${selectedYear}`;
+            // อัปเดต Subtitle
+            const subtitleText = selectedYears.size === 0 
+                ? 'ทุกปีการศึกษา' 
+                : `ปีการศึกษา: ${Array.from(selectedYears).sort().join(', ')}`;
+            document.getElementById('donut-subtitle').textContent = subtitleText;
 
             // เตรียมข้อมูลกราฟแท่ง
             const groupedTrend = globalData.reduce((acc, curr) => {
@@ -399,7 +441,7 @@
                             label: 'National',
                             data: nationalData,
                             backgroundColor: LEVEL_COLORS.National,
-                            borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
+                            borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 6, bottomRight: 6 },
                             borderSkipped: false,
                             barThickness: 32
                         },
@@ -407,7 +449,7 @@
                             label: 'International',
                             data: internationalData,
                             backgroundColor: LEVEL_COLORS.International,
-                            borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
+                            borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 6, bottomRight: 6 },
                             borderSkipped: false,
                             barThickness: 32
                         }
@@ -418,11 +460,11 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: { stacked: true, grid: { display: false } },
-                        y: { stacked: true, grid: { color: '#f1f5f9', borderDash: [3, 3] }, beginAtZero: true }
+                        y: { stacked: true, grid: { color: '#f8fafc', borderDash: [5, 5] }, beginAtZero: true }
                     },
                     plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
-                        tooltip: { backgroundColor: 'white', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1 }
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: {family: 'Sarabun', weight: 'bold'} } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: {family: 'Sarabun'}, bodyFont: {family: 'Sarabun'}, padding: 12, cornerRadius: 8 }
                     }
                 }
             });
@@ -440,17 +482,18 @@
                     datasets: [{
                         data: dataCounts,
                         backgroundColor: [LEVEL_COLORS.National, LEVEL_COLORS.International],
-                        borderWidth: 0,
-                        hoverOffset: 4
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 8
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '75%',
+                    cutout: '70%',
                     plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
-                        tooltip: { backgroundColor: 'white', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1 }
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: {family: 'Sarabun', weight: 'bold'} } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: {family: 'Sarabun'}, bodyFont: {family: 'Sarabun'}, padding: 12, cornerRadius: 8 }
                     }
                 }
             });
@@ -462,27 +505,27 @@
             tbody.innerHTML = '';
 
             if (summary.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-slate-400">ไม่มีข้อมูลสำหรับปีที่เลือก หรือไม่มีผลงานในระดับที่กำหนด</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลสำหรับปีที่เลือก หรือไม่มีผลงานในระดับที่กำหนด</td></tr>';
                 return;
             }
 
             summary.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-50 last:border-none hover:bg-slate-50/50 transition-colors";
+                tr.className = "border-b border-slate-50 last:border-none hover:bg-slate-50/70 transition-colors";
                 
-                let badgeClass = 'bg-slate-100 text-slate-800';
-                if (row.tier.includes('Q')) badgeClass = 'bg-sky-100 text-sky-800';
-                else if (row.tier.includes('TCI')) badgeClass = 'bg-emerald-100 text-emerald-800';
+                let badgeClass = 'bg-slate-100 text-slate-700';
+                if (row.tier.includes('Q')) badgeClass = 'bg-orange-100 text-orange-700';
+                else if (row.tier.includes('Proceeding')) badgeClass = 'bg-indigo-100 text-indigo-700';
 
                 tr.innerHTML = `
                     <td class="py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">
+                        <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold ${badgeClass}">
                             ${row.tier}
                         </span>
                     </td>
-                    <td class="py-4 text-center text-slate-600">${row.national > 0 ? row.national : '-'}</td>
-                    <td class="py-4 text-center text-slate-600">${row.international > 0 ? row.international : '-'}</td>
-                    <td class="py-4 text-right font-medium text-slate-900">${row.total}</td>
+                    <td class="py-4 text-center text-slate-600 font-medium">${row.national > 0 ? row.national : '-'}</td>
+                    <td class="py-4 text-center text-slate-600 font-medium">${row.international > 0 ? row.international : '-'}</td>
+                    <td class="py-4 text-right font-bold text-slate-900 text-base">${row.total}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -491,7 +534,7 @@
         function renderWordCloud(filteredData) {
             const wordCounts = {};
             
-            // นับความถี่ของแต่ละ Keyword
+            // นับความถี่
             filteredData.forEach(d => {
                 if (d.keywords && d.keywords.length > 0) {
                     d.keywords.forEach(kw => {
@@ -500,8 +543,11 @@
                 }
             });
 
-            const wordList = Object.keys(wordCounts).map(kw => [kw, wordCounts[kw]]);
-            wordList.sort((a, b) => b[1] - a[1]); // เรียงจากมากไปน้อย
+            let wordList = Object.keys(wordCounts).map(kw => [kw, wordCounts[kw]]);
+            wordList.sort((a, b) => b[1] - a[1]); 
+            
+            // ⚡ Performance Fix: จำกัดแค่ Top 70 คำ เพื่อไม่ให้ดึงทรัพยากรเครื่องจนเบราว์เซอร์ค้าง
+            wordList = wordList.slice(0, 70); 
 
             const container = document.getElementById('wordcloud-container');
             const canvas = document.getElementById('wordCloudCanvas');
@@ -520,7 +566,8 @@
             }
 
             const maxCount = wordList[0][1];
-            const weightFactor = 50 / maxCount;
+            // ปรับตัวคูณขนาดฟอนต์ให้สมดุล
+            const weightFactor = maxCount > 0 ? (60 / maxCount) : 1; 
 
             WordCloud(canvas, {
                 list: wordList,
@@ -532,24 +579,26 @@
                 color: function () {
                     return WORDCLOUD_COLORS[Math.floor(Math.random() * WORDCLOUD_COLORS.length)];
                 },
-                rotateRatio: 0.3,
+                rotateRatio: 0.2, // ลดโอกาสหมุนคำลงให้อ่านง่ายขึ้น
                 rotationSteps: 2,
                 backgroundColor: 'transparent',
-                gridSize: 10,
+                gridSize: 12,
                 shrinkToFit: true,
                 drawOutOfBound: false
             });
         }
 
-        window.addEventListener('resize', () => {
+        // ⚡ Performance Fix: ใช้ Debounce สำหรับตอนย่อขยายหน้าจอ (หน่วงเวลา 300ms ค่อยวาด WordCloud ใหม่)
+        const handleResize = debounce(() => {
             if (globalData && globalData.length > 0) {
-                const select = document.getElementById('yearSelect');
-                const filteredData = select.value === 'All' 
+                const filteredData = selectedYears.size === 0 
                     ? globalData 
-                    : globalData.filter(d => d.year_be.toString() === select.value);
+                    : globalData.filter(d => selectedYears.has(d.year_be.toString()));
                 renderWordCloud(filteredData);
             }
-        });
+        }, 300);
+
+        window.addEventListener('resize', handleResize);
 
         // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
         document.addEventListener('DOMContentLoaded', initApp);
