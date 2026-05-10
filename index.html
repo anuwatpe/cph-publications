@@ -216,7 +216,38 @@
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden rounded-r-3xl"></div>
         </div>
 
-        <!-- Individual Publications Table (NEW) -->
+        <!-- Author Profile Summary (NEW) -->
+        <div id="author-profile-section" class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl text-white mt-6 hidden transition-all relative overflow-hidden">
+            <!-- Background Decoration -->
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                <div class="flex items-center gap-5 w-full md:w-auto">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-inner flex-shrink-0 border border-white/10">
+                        <i data-lucide="user" class="w-10 h-10 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold" id="profile-name">ชื่อบุคลากร</h2>
+                        <div id="profile-link-container" class="mt-3 flex gap-2 flex-wrap">
+                            <!-- ลิงก์โปรไฟล์จะถูกแสดงตรงนี้ -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 w-full md:w-auto">
+                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
+                        <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">h-index</p>
+                        <p class="text-4xl font-extrabold text-emerald-400 drop-shadow-sm" id="profile-hindex">-</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
+                        <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">Citations</p>
+                        <p class="text-4xl font-extrabold text-sky-400 drop-shadow-sm" id="profile-citations">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual Publications Table -->
         <div id="author-publications-section" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden hidden transition-all">
             <div class="flex justify-between items-end mb-6">
                 <div>
@@ -286,15 +317,15 @@
         let trendChartInstance = null;
         let donutChartInstance = null;
 
-        // ข้อมูลตัวอย่าง
+        // ข้อมูลตัวอย่าง (เพิ่ม h-index และ citations เข้ามาจำลองให้ดู)
         const fallbackMockData = [
-            { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028" },
-            { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์กับพฤติกรรมการเลือกซื้อเครื่องสำอาง", pub_name: "วารสารสาธารณสุขและวิทยาศาสตร์สุขภาพ", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"], citation: "-", urlDoi: "" },
-            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"], citation: "-", urlDoi: "" },
-            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"], citation: "-", urlDoi: "" },
-            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญาของนักเรียน", pub_name: "วารสารอนามัยสิ่งแวดล้อม และสุขภาพชุมชน", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"], citation: "-", urlDoi: "" },
-            { author: "DC", year_be: 2567, title: "Associated factors of non-recurrence stroke", pub_name: "International Journal of Pubilc Health Science", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"], citation: "-", urlDoi: "" },
-            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุนที่มีผลต่อการปฏิบัติงาน", pub_name: "วารสารมหาวิทยาลัยคริสเตียน", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"], citation: "-", urlDoi: "" }
+            { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450" },
+            { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์กับพฤติกรรมการเลือกซื้อเครื่องสำอาง", pub_name: "วารสารสาธารณสุขและวิทยาศาสตร์สุขภาพ", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "2", totalCitations: "15" },
+            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"], citation: "-", urlDoi: "", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450" },
+            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"], citation: "-", urlDoi: "", profileLink: "https://orcid.org", hIndex: "5", totalCitations: "89" },
+            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญาของนักเรียน", pub_name: "วารสารอนามัยสิ่งแวดล้อม และสุขภาพชุมชน", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-" },
+            { author: "DC", year_be: 2567, title: "Associated factors of non-recurrence stroke", pub_name: "International Journal of Pubilc Health Science", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"], citation: "-", urlDoi: "", profileLink: "https://www.semanticscholar.org", hIndex: "3", totalCitations: "42" },
+            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุนที่มีผลต่อการปฏิบัติงาน", pub_name: "วารสารมหาวิทยาลัยคริสเตียน", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-" }
         ];
 
         function parseCSV(str) {
@@ -361,7 +392,12 @@
                         tier: d.tier || 'NA',
                         keywords: cleanedKeywords,
                         citation: d.citation || '',
-                        urlDoi: d['url-doi'] || d.url_doi || d.url || ''
+                        urlDoi: d['url-doi'] || d.url_doi || d.url || '',
+                        
+                        // ดึงข้อมูลโปรไฟล์และสถิติ (รองรับชื่อคอลัมน์หลายแบบ)
+                        profileLink: d.profile || d.Profile || '',
+                        hIndex: d['h-index'] || d.h_index || d.hIndex || d['h index'] || '',
+                        totalCitations: d.total_citations || d.author_citations || d.citations_count || ''
                     };
                 });
 
@@ -570,6 +606,7 @@
 
             // --- 4. แสดงผลงานรายบุคคล (แสดงเฉพาะเมื่อเลือกบุคคล) ---
             renderAuthorPublicationsTable(filteredData);
+            renderAuthorProfileCard(filteredData); // เรียกใช้วาดโปรไฟล์
 
             // --- 5. อัปเดต Word Cloud เฉพาะเมื่อมีการเปลี่ยน "บุคลากร" เท่านั้น ---
             // (ไม่สนใจว่ากดเปลี่ยนปีหรือไม่ เพราะเราจะดึงข้อมูลทุกปีของคนๆ นั้นเสมอ)
@@ -724,6 +761,44 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // วาดการ์ดโปรไฟล์ส่วนบุคคล
+        function renderAuthorProfileCard(data) {
+            const profileSection = document.getElementById('author-profile-section');
+            
+            if (selectedAuthor === 'All' || data.length === 0) {
+                profileSection.classList.add('hidden');
+                return;
+            }
+
+            // แสดงการ์ด
+            profileSection.classList.remove('hidden');
+            document.getElementById('profile-name').textContent = selectedAuthor;
+
+            // ดึงข้อมูลแถวแรกของบุคคลนี้เพื่อดึงสถิติ
+            const authorInfo = data[0];
+
+            // เซ็ตค่า h-index และ citations
+            document.getElementById('profile-hindex').textContent = authorInfo.hIndex || '-';
+            document.getElementById('profile-citations').textContent = authorInfo.totalCitations || '-';
+
+            // สร้างปุ่มลิงก์โปรไฟล์ (ถ้ามี)
+            const linkContainer = document.getElementById('profile-link-container');
+            if (authorInfo.profileLink && authorInfo.profileLink.trim() !== '' && authorInfo.profileLink !== 'NA') {
+                let url = authorInfo.profileLink.trim();
+                if (!url.startsWith('http')) url = 'https://' + url;
+                
+                let btnLabel = 'ดูโปรไฟล์ (Scholar)';
+                if (url.includes('orcid')) btnLabel = 'ดูโปรไฟล์ (ORCID)';
+                if (url.includes('semanticscholar')) btnLabel = 'ดูโปรไฟล์ (Semantic Scholar)';
+
+                linkContainer.innerHTML = `<a href="${url}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-full transition-colors shadow-sm"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> ${btnLabel}</a>`;
+            } else {
+                linkContainer.innerHTML = `<span class="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-full"><i data-lucide="link-2-off" class="w-3.5 h-3.5"></i> ไม่มีข้อมูลลิงก์โปรไฟล์</span>`;
+            }
+            
+            lucide.createIcons();
         }
 
         // วาดตารางผลงานรายบุคคล
