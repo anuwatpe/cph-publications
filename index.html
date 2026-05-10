@@ -221,7 +221,7 @@
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
-                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยทั้งหมด (คำนวณจากภาพรวมทุกปีและทุกคน)</p>
+                    <p id="wordcloud-subtitle" class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัย (คำนวณจากภาพรวมทุกปีและทุกคน)</p>
                 </div>
             </div>
             
@@ -256,6 +256,8 @@
         let globalData = [];
         let selectedYears = new Set(); 
         let selectedAuthor = 'All'; // ตัวแปรเก็บผู้แต่งที่ถูกเลือก
+        let lastWordCloudAuthor = null; // ตัวแปรเช็คว่าเคยวาด Word Cloud ของคนนี้ไปหรือยัง (ลดการวาดซ้ำ)
+        
         let trendChartInstance = null;
         let donutChartInstance = null;
 
@@ -351,11 +353,8 @@
                 globalData = fallbackMockData;
             } finally {
                 renderYearFilters();
-                renderAuthorFilter(); // สั่งเรนเดอร์ Dropdown ผู้แต่ง
-                updateDashboard(); // อัปเดต Filter, กราฟสถิติ, ตาราง
-                
-                // วาด Word Cloud ครั้งเดียวตอนเปิดโหลดเว็บ โดยใช้ข้อมูลทั้งหมด (globalData) เสมอ
-                renderWordCloud(globalData);
+                renderAuthorFilter();
+                updateDashboard(); // อัปเดตข้อมูลทั้งหมดรวมถึง Word Cloud ในครั้งแรก
                 
                 document.getElementById('loader').classList.add('hidden');
             }
@@ -401,12 +400,10 @@
             });
         }
 
-        // ฟังก์ชันสำหรับสร้าง Dropdown เลือกผู้แต่ง
         function renderAuthorFilter() {
             const select = document.getElementById('authorSelect');
             select.innerHTML = '<option value="All">บุคลากรทุกคน</option>';
             
-            // ดึงชื่อผู้แต่งทั้งหมดและลบค่าซ้ำ
             const authors = Array.from(new Set(globalData.map(d => d.author).filter(a => a && a !== 'ไม่ระบุชื่อ'))).sort();
             
             authors.forEach(author => {
@@ -416,7 +413,6 @@
                 select.appendChild(opt);
             });
 
-            // เมื่อมีการเปลี่ยนชื่อ ให้เก็บค่าลงตัวแปรแล้วสั่งอัปเดต
             select.addEventListener('change', (e) => {
                 selectedAuthor = e.target.value;
                 updateDashboard();
@@ -424,7 +420,7 @@
         }
 
         function updateDashboard() {
-            // กรองข้อมูลด้วยเงื่อนไข "ปีที่เลือก" และ "บุคคลที่เลือก"
+            // กรองข้อมูลสถิติ/ตาราง/กราฟ (คิดเงื่อนไขปี + บุคคล)
             const filteredData = globalData.filter(d => {
                 const matchYear = selectedYears.size === 0 || selectedYears.has(d.year_be.toString());
                 const matchAuthor = selectedAuthor === 'All' || d.author === selectedAuthor;
@@ -441,7 +437,6 @@
             document.getElementById('stat-national').textContent = national;
             document.getElementById('stat-q1q2').textContent = q1q2;
             
-            // อัปเดต Subtitle ให้อ่านง่ายขึ้นว่ากำลังดูข้อมูลของใคร ปีอะไร
             const yearText = selectedYears.size === 0 ? 'ทุกปีการศึกษา' : `ปี: ${Array.from(selectedYears).sort().join(', ')}`;
             const authorText = selectedAuthor === 'All' ? 'ทุกคน' : `บุคลากร: ${selectedAuthor}`;
             document.getElementById('donut-subtitle').textContent = `${yearText} | ${authorText}`;
@@ -459,12 +454,11 @@
             const trendDataSorted = Object.values(groupedTrend).sort((a, b) => a.year - b.year);
             updateTrendChart(trendDataSorted);
             
-            // --- 2. เตรียมข้อมูลกราฟโดนัท (แยกตาม Tier) ---
+            // --- 2. เตรียมข้อมูลกราฟโดนัท ---
             const tierCounts = {};
             filteredData.forEach(d => {
                 let t = d.tier ? d.tier.toUpperCase().trim() : 'NA';
                 if (t === '') t = 'NA';
-                // รวบรวม Proceeding ให้อยู่กลุ่มเดียวกัน
                 if (t.includes('PROCEEDING') || (d.type && d.type.toUpperCase().includes('PROCEEDING'))) t = 'PROCEEDING';
                 tierCounts[t] = (tierCounts[t] || 0) + 1;
             });
@@ -491,7 +485,7 @@
             
             updateDonutChart(donutLabels, donutData, donutColors);
 
-            // --- 3. เตรียมข้อมูลตาราง (ตามฟอร์ม 2568) ---
+            // --- 3. เตรียมข้อมูลตาราง ---
             const yearStats = {};
             filteredData.forEach(d => {
                 const y = d.year_be || 'N/A';
@@ -524,8 +518,6 @@
             });
 
             const tableRows = Object.values(yearStats).sort((a,b) => a.year - b.year);
-            
-            // คำนวณแถวรวม (Totals)
             const totals = {
                 year: 'รวมทั้งหมด',
                 nat_tci: 0, nat_tci3: 0, nat_tci2: 0, nat_tci1: 0, nat_proc: 0,
@@ -548,8 +540,26 @@
 
             renderTable2568(tableRows);
 
-            // หมายเหตุ: ตัดการเรนเดอร์ Word Cloud ออกจาก updateDashboard 
-            // เพื่อไม่ให้วาดใหม่เวลากดเปลี่ยนปี หรือเปลี่ยนคน
+            // --- 4. อัปเดต Word Cloud เฉพาะเมื่อมีการเปลี่ยน "บุคลากร" เท่านั้น ---
+            // (ไม่สนใจว่ากดเปลี่ยนปีหรือไม่ เพราะเราจะดึงข้อมูลทุกปีของคนๆ นั้นเสมอ)
+            if (selectedAuthor !== lastWordCloudAuthor) {
+                const wordCloudData = selectedAuthor === 'All' 
+                    ? globalData 
+                    : globalData.filter(d => d.author === selectedAuthor);
+                
+                renderWordCloud(wordCloudData);
+                lastWordCloudAuthor = selectedAuthor;
+
+                // เปลี่ยนข้อความ Subtitle ของกล่อง Word Cloud เพื่อบอกผู้ใช้ว่ากำลังดูของใครอยู่
+                const wcSubtitle = document.getElementById('wordcloud-subtitle');
+                if (wcSubtitle) {
+                    if (selectedAuthor === 'All') {
+                        wcSubtitle.textContent = 'คำสำคัญที่ถูกใช้ในงานวิจัย (ภาพรวมของทุกคนในทุกปีการศึกษา)';
+                    } else {
+                        wcSubtitle.textContent = `คำสำคัญที่ถูกใช้ในงานวิจัยของ: ${selectedAuthor} (รวมทุกปีการศึกษา)`;
+                    }
+                }
+            }
         }
 
         function updateTrendChart(data) {
@@ -685,11 +695,11 @@
             });
         }
 
-        function renderWordCloud(allData) {
+        function renderWordCloud(authorData) {
             const wordCounts = {};
             
-            // คำนวณความถี่โดยใช้ข้อมูลภาพรวมทั้งหมด (allData) เสมอ
-            allData.forEach(d => {
+            // นับความถี่โดยใช้ข้อมูลที่ถูกกรองตามชื่อคน (แต่รวมทุกปี)
+            authorData.forEach(d => {
                 if (d.keywords && d.keywords.length > 0) {
                     d.keywords.forEach(kw => {
                         wordCounts[kw] = (wordCounts[kw] || 0) + 1;
@@ -713,7 +723,7 @@
                 ctx.font = '16px Sarabun';
                 ctx.fillStyle = '#94a3b8';
                 ctx.textAlign = 'center';
-                ctx.fillText('ไม่มีข้อมูลคำสำคัญ', canvas.width / 2, canvas.height / 2);
+                ctx.fillText('ไม่มีข้อมูลคำสำคัญสำหรับบุคคลนี้', canvas.width / 2, canvas.height / 2);
                 return;
             }
 
