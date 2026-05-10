@@ -17,6 +17,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Vis Network สำหรับสร้าง Network Analysis -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
@@ -105,63 +107,102 @@
             </div>
         </div>
 
-        <!-- Author Profile Summary -->
-        <div id="author-profile-section" class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl text-white hidden transition-all relative overflow-hidden">
-            <!-- Background Decoration -->
-            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
+        <!-- ========================================== -->
+        <!-- ส่วนข้อมูลรายบุคคล (Profile + Publications) -->
+        <!-- ========================================== -->
+        <div id="author-data-wrapper" class="flex flex-col gap-6 mt-6 hidden">
             
-            <!-- 📌 ปุ่ม Export PDF -->
-            <button onclick="exportProfilePDF()" data-html2canvas-ignore class="absolute top-4 right-4 sm:top-6 sm:right-6 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl px-4 py-2 flex items-center gap-2 transition-colors z-20 shadow-sm text-xs font-bold" title="ส่งออกเป็นไฟล์ PDF">
-                <i data-lucide="file-down" class="w-4 h-4"></i> Export PDF
-            </button>
-
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10 mt-8 sm:mt-0">
-                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 w-full md:w-auto text-center sm:text-left">
-                    <!-- รูปโปรไฟล์ -->
-                    <div id="profile-image-container" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl font-bold shadow-inner flex-shrink-0 border border-white/10 overflow-hidden relative">
-                        <i data-lucide="user" class="w-12 h-12 text-white/80"></i>
-                    </div>
-                    <div class="flex flex-col justify-center py-1">
-                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight" id="profile-name">ชื่อบุคลากร</h2>
-                        
-                        <!-- อีเมล -->
-                        <div id="profile-email-container" class="text-slate-300 text-sm mt-2 flex items-center justify-center sm:justify-start gap-2 hidden">
-                            <i data-lucide="mail" class="w-4 h-4 opacity-70"></i>
-                            <span id="profile-email" class="font-medium tracking-wide">email@example.com</span>
-                        </div>
-                        
-                        <!-- ลิงก์โปรไฟล์ -->
-                        <div id="profile-link-container" class="mt-4 flex gap-2 flex-wrap justify-center sm:justify-start">
-                            <!-- ลิงก์โปรไฟล์จะถูกแสดงตรงนี้ -->
-                        </div>
-                    </div>
-                </div>
+            <!-- Author Profile Summary -->
+            <div id="author-profile-section" class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl text-white relative overflow-hidden">
+                <!-- Background Decoration -->
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
                 
-                <div class="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
-                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
-                        <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">h-index</p>
-                        <p class="text-4xl font-extrabold text-emerald-400 drop-shadow-sm" id="profile-hindex">-</p>
+                <!-- 📌 ปุ่ม Export PDF (ครอบคลุมทั้งโปรไฟล์และตาราง) -->
+                <button onclick="exportProfileAndWorksPDF()" data-html2canvas-ignore="true" class="absolute top-4 right-4 sm:top-6 sm:right-6 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl px-4 py-2 flex items-center gap-2 transition-colors z-20 shadow-sm text-xs font-bold" title="ส่งออกเป็นไฟล์ PDF">
+                    <i data-lucide="file-down" class="w-4 h-4"></i> Export PDF
+                </button>
+
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10 mt-8 sm:mt-0">
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 w-full md:w-auto text-center sm:text-left">
+                        <!-- รูปโปรไฟล์ -->
+                        <div id="profile-image-container" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl font-bold shadow-inner flex-shrink-0 border border-white/10 overflow-hidden relative">
+                            <i data-lucide="user" class="w-12 h-12 text-white/80"></i>
+                        </div>
+                        <div class="flex flex-col justify-center py-1">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight" id="profile-name">ชื่อบุคลากร</h2>
+                            
+                            <!-- อีเมล -->
+                            <div id="profile-email-container" class="text-slate-300 text-sm mt-2 flex items-center justify-center sm:justify-start gap-2 hidden">
+                                <i data-lucide="mail" class="w-4 h-4 opacity-70"></i>
+                                <span id="profile-email" class="font-medium tracking-wide">email@example.com</span>
+                            </div>
+                            
+                            <!-- ลิงก์โปรไฟล์ -->
+                            <div id="profile-link-container" class="mt-4 flex gap-2 flex-wrap justify-center sm:justify-start">
+                                <!-- ลิงก์โปรไฟล์จะถูกแสดงตรงนี้ -->
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
-                        <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">Citations</p>
-                        <p class="text-4xl font-extrabold text-sky-400 drop-shadow-sm" id="profile-citations">-</p>
+                    
+                    <div class="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
+                        <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
+                            <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">h-index</p>
+                            <p class="text-4xl font-extrabold text-emerald-400 drop-shadow-sm" id="profile-hindex">-</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
+                            <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">Citations</p>
+                            <p class="text-4xl font-extrabold text-sky-400 drop-shadow-sm" id="profile-citations">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research Interest -->
+                <div id="profile-interest-container" class="relative z-10 mt-6 pt-5 border-t border-white/10 hidden">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5 bg-indigo-500/20 p-2 rounded-xl border border-indigo-400/20 text-indigo-300">
+                            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1.5">Research Interest / ความเชี่ยวชาญ</h3>
+                            <p class="text-sm md:text-base font-medium text-slate-100 leading-relaxed" id="profile-interest">-</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Research Interest -->
-            <div id="profile-interest-container" class="relative z-10 mt-6 pt-5 border-t border-white/10 hidden">
-                <div class="flex items-start gap-3">
-                    <div class="mt-0.5 bg-indigo-500/20 p-2 rounded-xl border border-indigo-400/20 text-indigo-300">
-                        <i data-lucide="lightbulb" class="w-5 h-5"></i>
-                    </div>
+            <!-- Individual Publications Table -->
+            <div id="author-publications-section" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 overflow-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
                     <div>
-                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1.5">Research Interest / ความเชี่ยวชาญ</h3>
-                        <p class="text-sm md:text-base font-medium text-slate-100 leading-relaxed" id="profile-interest">-</p>
+                        <h2 class="text-lg font-bold text-slate-800">รายการผลงานตีพิมพ์รายบุคคล</h2>
+                        <p id="author-publications-subtitle" class="text-sm text-slate-500 mt-1">แสดงผลงานทั้งหมดของบุคลากรที่เลือก</p>
                     </div>
+                    <!-- 📌 ปุ่ม Export Excel -->
+                    <button onclick="exportTableExcel()" data-html2canvas-ignore="true" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap" title="ส่งออกเป็นไฟล์ Excel">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
+                    </button>
+                </div>
+                <div class="overflow-x-auto pb-4 hide-scrollbar">
+                    <table class="w-full text-left text-sm border-collapse min-w-[800px]" id="author-publications-table">
+                        <thead>
+                            <tr class="border-b-2 border-slate-200 bg-slate-50">
+                                <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
+                                <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
+                                <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
+                                <th class="p-3 font-bold text-slate-700 text-center w-24">Tier</th>
+                                <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="author-publications-body">
+                            <!-- ข้อมูลจะถูกใส่ด้วย JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            
         </div>
+        <!-- ========================================== -->
+
 
         <!-- Stats Cards (Vibrant Gradients) -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
@@ -274,36 +315,6 @@
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden rounded-r-3xl"></div>
         </div>
 
-        <!-- Individual Publications Table -->
-        <div id="author-publications-section" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden hidden transition-all">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-800">รายการผลงานตีพิมพ์รายบุคคล</h2>
-                    <p id="author-publications-subtitle" class="text-sm text-slate-500 mt-1">แสดงผลงานทั้งหมดของบุคลากรที่เลือก</p>
-                </div>
-                <!-- 📌 ปุ่ม Export Excel -->
-                <button onclick="exportTableExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap" title="ส่งออกเป็นไฟล์ Excel">
-                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
-                </button>
-            </div>
-            <div class="overflow-x-auto pb-4 hide-scrollbar">
-                <table class="w-full text-left text-sm border-collapse min-w-[800px]" id="author-publications-table">
-                    <thead>
-                        <tr class="border-b-2 border-slate-200 bg-slate-50">
-                            <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
-                            <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
-                            <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
-                            <th class="p-3 font-bold text-slate-700 text-center w-24">Tier</th>
-                            <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="author-publications-body">
-                        <!-- ข้อมูลจะถูกใส่ด้วย JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         <!-- Word Cloud Section -->
         <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-6">
             <div class="flex justify-between items-end mb-6">
@@ -318,12 +329,30 @@
             </div>
         </div>
 
+        <!-- Co-authorship Network Analysis Section -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-12">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">เครือข่ายผู้แต่งร่วม (Co-authorship Network Analysis)</h2>
+                    <p id="network-subtitle" class="text-sm text-slate-500 mt-1">วิเคราะห์ความร่วมมือระหว่างบุคคล จากข้อมูลการอ้างอิง (Citation)</p>
+                </div>
+            </div>
+            
+            <div id="coauthor-network-container" class="w-full flex justify-center items-center h-[500px] relative bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-inner">
+                <!-- กราฟเครือข่ายจะถูกวาดที่นี่ -->
+            </div>
+            <p class="text-xs text-slate-400 mt-3 text-center">* สามารถใช้เมาส์ซูมเข้า-ออก หรือลากจุด (Node) เพื่อดูความสัมพันธ์ที่ชัดเจนขึ้นได้</p>
+        </div>
+
     </div>
 
     <!-- Copyright Footer -->
-    <footer class="max-w-7xl mx-auto pb-8 pt-2 text-center border-t border-slate-200 mt-4">
-        <p class="text-sm text-slate-500 font-medium mt-6">
+    <footer class="max-w-7xl mx-auto pb-8 pt-4 text-center border-t border-slate-200 mt-4">
+        <p class="text-sm text-slate-500 font-medium">
             &copy; <span id="current-year"></span> Publications Dashboard สาขาสาธารณสุขชุมชน. All rights reserved.
+        </p>
+        <p class="text-xs text-slate-400 mt-1.5 font-medium tracking-wide">
+            Developed by Anuwat Pengput
         </p>
     </footer>
 
@@ -353,6 +382,7 @@
         
         let trendChartInstance = null;
         let donutChartInstance = null;
+        let coAuthorNetworkInstance = null;
 
         const fallbackMockData = [
             { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap", researchInterest: "Epidemiology, Public Health, Infectious Diseases" },
@@ -538,6 +568,14 @@
             const authorText = selectedAuthor === 'All' ? 'ทุกคน' : `บุคลากร: ${selectedAuthor}`;
             document.getElementById('donut-subtitle').textContent = `${yearText} | ${authorText}`;
 
+            // --- ซ่อนหรือแสดงกรอบข้อมูลรายบุคคล ---
+            const authorDataWrapper = document.getElementById('author-data-wrapper');
+            if (selectedAuthor === 'All') {
+                authorDataWrapper.classList.add('hidden');
+            } else {
+                authorDataWrapper.classList.remove('hidden');
+            }
+
             // --- 1. เตรียมข้อมูลกราฟแท่ง ---
             const groupedTrend = filteredData.reduce((acc, curr) => {
                 const y = curr.year_be;
@@ -641,23 +679,27 @@
             renderAuthorPublicationsTable(filteredData);
             renderAuthorProfileCard(filteredData);
 
-            // --- 5. อัปเดต Word Cloud ---
+            // --- 5. อัปเดต Word Cloud & Co-authorship Network ---
             if (selectedAuthor !== lastWordCloudAuthor) {
                 const authorFilteredData = selectedAuthor === 'All' 
                     ? globalData 
                     : globalData.filter(d => d.author === selectedAuthor);
                 
                 renderWordCloud(authorFilteredData);
+                renderCoAuthorNetwork(authorFilteredData);
                 
                 lastWordCloudAuthor = selectedAuthor;
 
                 const wcSubtitle = document.getElementById('wordcloud-subtitle');
+                const netSubtitle = document.getElementById('network-subtitle');
                 
-                if (wcSubtitle) {
+                if (wcSubtitle && netSubtitle) {
                     if (selectedAuthor === 'All') {
                         wcSubtitle.textContent = 'คำสำคัญที่ถูกใช้ในงานวิจัย (ภาพรวมของทุกคนในทุกปีการศึกษา)';
+                        netSubtitle.textContent = 'วิเคราะห์ความร่วมมือระหว่างบุคคล จากข้อมูลการอ้างอิงของทุกคน';
                     } else {
                         wcSubtitle.textContent = `คำสำคัญที่ถูกใช้ในงานวิจัยของ: ${selectedAuthor} (รวมทุกปีการศึกษา)`;
+                        netSubtitle.textContent = `วิเคราะห์ความร่วมมือเครือข่ายผู้แต่งร่วมของ: ${selectedAuthor}`;
                     }
                 }
             }
@@ -796,14 +838,8 @@
         }
 
         function renderAuthorProfileCard(data) {
-            const profileSection = document.getElementById('author-profile-section');
-            
-            if (selectedAuthor === 'All' || data.length === 0) {
-                profileSection.classList.add('hidden');
-                return;
-            }
+            if (data.length === 0) return;
 
-            profileSection.classList.remove('hidden');
             document.getElementById('profile-name').textContent = selectedAuthor;
 
             let authorInfo = data.find(d => d.profileImage || d.email) || data[0];
@@ -859,18 +895,11 @@
         }
 
         function renderAuthorPublicationsTable(data) {
-            const section = document.getElementById('author-publications-section');
             const tbody = document.getElementById('author-publications-body');
             const subtitle = document.getElementById('author-publications-subtitle');
             
-            if (!section || !tbody) return;
+            if (!tbody) return;
 
-            if (selectedAuthor === 'All') {
-                section.classList.add('hidden');
-                return;
-            }
-
-            section.classList.remove('hidden');
             subtitle.textContent = `แสดงผลงานของ: ${selectedAuthor}`;
             tbody.innerHTML = '';
 
@@ -974,26 +1003,154 @@
             });
         }
 
-        // --- 📌 ฟังก์ชัน Export PDF (โปรไฟล์) ---
-        function exportProfilePDF() {
+        // ฟังก์ชันวาดเครือข่าย Co-Authorship
+        function renderCoAuthorNetwork(authorData) {
+            const nodeFreq = {};
+            const edgeMap = {};
+
+            // ดึงชื่อผู้แต่งจาก Citation
+            authorData.forEach(d => {
+                if (d.citation && d.citation.length > 10 && d.citation !== '-') {
+                    const match = d.citation.match(/^(.*?)\s*\(\d{4}\)/);
+                    let authorStr = match ? match[1] : d.citation.split('.')[0];
+                    
+                    if (authorStr) {
+                        let rawAuthors = authorStr.split(/\.,\s*(?:&\s*)?|\s+&\s+/);
+                        let authors = rawAuthors.map(a => a.replace(/[.,&]/g, '').trim()).filter(a => a.length > 2);
+                        
+                        authors.forEach(a => {
+                            nodeFreq[a] = (nodeFreq[a] || 0) + 1;
+                        });
+
+                        for (let i = 0; i < authors.length; i++) {
+                            for (let j = i + 1; j < authors.length; j++) {
+                                const edgeKey = [authors[i], authors[j]].sort().join('|||');
+                                edgeMap[edgeKey] = (edgeMap[edgeKey] || 0) + 1;
+                            }
+                        }
+                    }
+                }
+            });
+
+            let topAuthors = Object.entries(nodeFreq)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 40)
+                .map(e => e[0]);
+
+            const validNodes = new Set(topAuthors);
+            const container = document.getElementById('coauthor-network-container');
+
+            if (topAuthors.length <= 1) {
+                container.innerHTML = '<div class="text-slate-400 font-medium h-full flex items-center justify-center">ไม่มีข้อมูลอ้างอิง (Citation) เพียงพอสำหรับสร้างเครือข่ายผู้แต่งร่วม</div>';
+                return;
+            } else {
+                container.innerHTML = '';
+            }
+
+            const colorPalette = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#0ea5e9', '#f43f5e', '#14b8a6', '#6366f1'];
+
+            const nodes = topAuthors.map((author, index) => {
+                const nodeColor = colorPalette[index % colorPalette.length];
+                return {
+                    id: author,
+                    label: author,
+                    value: nodeFreq[author],
+                    title: `<b>${author}</b><br>ผลงานในเครือข่าย: ${nodeFreq[author]} เรื่อง`,
+                    color: {
+                        background: nodeColor,
+                        border: '#ffffff',
+                        highlight: { background: '#1e293b', border: nodeColor }
+                    }
+                };
+            });
+
+            const edges = [];
+            Object.entries(edgeMap).forEach(([edgeKey, weight]) => {
+                const [a1, a2] = edgeKey.split('|||');
+                if (validNodes.has(a1) && validNodes.has(a2)) {
+                    edges.push({
+                        from: a1,
+                        to: a2,
+                        value: weight, 
+                        title: `ร่วมงานกัน: ${weight} ครั้ง`,
+                        color: { inherit: 'from', opacity: 0.7, highlight: '#1e293b' }
+                    });
+                }
+            });
+
+            const data = { nodes: nodes, edges: edges };
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    scaling: { min: 10, max: 35 },
+                    font: { size: 12, face: 'Sarabun', color: '#334155', strokeWidth: 2, strokeColor: '#ffffff' },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: { smooth: { type: 'continuous' } },
+                physics: {
+                    barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 150 },
+                    stabilization: { iterations: 150 }
+                },
+                interaction: { hover: true, tooltipDelay: 100, zoomView: true }
+            };
+
+            if (coAuthorNetworkInstance) {
+                coAuthorNetworkInstance.destroy();
+            }
+            coAuthorNetworkInstance = new vis.Network(container, data, options);
+        }
+
+        // --- 📌 ฟังก์ชัน Export PDF (โปรไฟล์ + ตารางผลงาน) ---
+        function exportProfileAndWorksPDF() {
             if (selectedAuthor === 'All') return;
             
-            const element = document.getElementById('author-profile-section');
-            const originalTransform = element.style.transform;
+            const element = document.getElementById('author-data-wrapper'); // 📌 ดึงคลุมทั้งสองส่วน
             
-            // ใช้ html2canvas จับภาพการ์ด
-            // (ใช้ useCORS เพื่อให้โหลดรูปโปรไฟล์จากเว็บอื่นได้ แต่เว็บต้นทางของรูปต้องอนุญาตด้วย)
+            // ยกเลิกข้อจำกัดการ Scroll ชั่วคราวเพื่อให้แคปตารางได้ครบ
+            const tableWrapper = document.querySelector('#author-publications-section .overflow-x-auto');
+            const originalOverflow = tableWrapper ? tableWrapper.style.overflowX : '';
+            if (tableWrapper) {
+                tableWrapper.classList.remove('overflow-x-auto');
+                tableWrapper.style.overflowX = 'visible';
+            }
+
             html2canvas(element, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
+                // คืนค่าการ Scroll ให้เหมือนเดิม
+                if (tableWrapper) {
+                    tableWrapper.classList.add('overflow-x-auto');
+                    tableWrapper.style.overflowX = originalOverflow;
+                }
+
                 const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
                 
-                // คำนวณขนาดให้พอดีกับกระดาษ A4 (แนวนอน)
-                const pdf = new jsPDF('l', 'mm', 'a4');
+                // ใช้กระดาษแนวตั้ง (Portrait) A4
+                const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                const pdfHeight = pdf.internal.pageSize.getHeight();
                 
-                pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
-                pdf.save(`${selectedAuthor}_Profile.pdf`);
+                // เว้นขอบซ้ายขวา
+                const margin = 10;
+                const contentWidth = pdfWidth - (margin * 2);
+                const imgHeight = (canvas.height * contentWidth) / canvas.width;
+                
+                let heightLeft = imgHeight;
+                let position = margin; // ระยะขอบบนสุด
+
+                // แปะภาพหน้าแรก
+                pdf.addImage(imgData, 'PNG', margin, position, contentWidth, imgHeight);
+                heightLeft -= (pdfHeight - margin * 2);
+
+                // ถ้าเนื้อหายาวเกิน 1 หน้า ให้คำนวณและเพิ่มหน้ากระดาษ (ขึ้นหน้าใหม่) อัตโนมัติ
+                while (heightLeft > 0) {
+                    position = position - (pdfHeight - margin * 2); 
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', margin, position, contentWidth, imgHeight);
+                    heightLeft -= (pdfHeight - margin * 2);
+                }
+                
+                pdf.save(`${selectedAuthor}_Profile_And_Publications.pdf`);
             }).catch(err => {
                 console.error("Export PDF Error:", err);
                 alert("เกิดข้อผิดพลาดในการสร้างไฟล์ PDF โปรดลองอีกครั้ง");
@@ -1004,10 +1161,9 @@
         function exportTableExcel() {
             if (selectedAuthor === 'All') return;
 
-            // ดึงเฉพาะข้อมูลของคนที่เลือก และจัด Format คอลัมน์ให้ดูสวยงาม
             const dataToExport = globalData
                 .filter(d => d.author === selectedAuthor)
-                .sort((a, b) => b.year_be - a.year_be) // เรียงจากปีใหม่ไปเก่า
+                .sort((a, b) => b.year_be - a.year_be) 
                 .map(d => ({
                     'ปี (Year)': d.year_be,
                     'ชื่อผลงาน (Title)': d.title,
@@ -1023,19 +1179,12 @@
                 return;
             }
 
-            // ใช้ไลบรารี SheetJS แปลง JSON เป็น Excel
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
             const workbook = XLSX.utils.book_new();
             
-            // ปรับความกว้างคอลัมน์อัตโนมัติคร่าวๆ
             worksheet['!cols'] = [
-                { wch: 10 },  // Year
-                { wch: 60 },  // Title
-                { wch: 40 },  // Journal
-                { wch: 15 },  // Level
-                { wch: 15 },  // Tier
-                { wch: 50 },  // Citation
-                { wch: 30 }   // URL
+                { wch: 10 }, { wch: 60 }, { wch: 40 }, 
+                { wch: 15 }, { wch: 15 }, { wch: 50 }, { wch: 30 }
             ];
 
             XLSX.utils.book_append_sheet(workbook, worksheet, "Publications");
@@ -1046,7 +1195,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             initApp();
             
-            // อัปเดตปี Copyright อัตโนมัติ
             const yearElem = document.getElementById('current-year');
             if (yearElem) {
                 yearElem.textContent = new Date().getFullYear();
