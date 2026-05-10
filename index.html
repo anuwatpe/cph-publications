@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publication Dashboard</title>
+    <!-- Tailwind CSS สำหรับการจัดหน้า -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js สำหรับวาดกราฟ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- WordCloud2.js สำหรับสร้าง Word Cloud -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+        
+        /* สไตล์สำหรับตอนกำลังโหลดข้อมูล */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(248, 250, 252, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 p-6">
+    
+    <!-- หน้าจอโหลดดิ้ง -->
+    <div id="loader">
+        <div class="spinner mb-4"></div>
+        <p class="text-slate-500 font-medium">กำลังโหลดข้อมูลจาก Google Sheet...</p>
+    </div>
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Header & Filters -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900">Publications Dashboard</h1>
+                <p class="text-sm text-slate-500" id="status-text">กำลังเชื่อมต่อข้อมูล...</p>
+            </div>
+            
+            <div class="bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 flex items-center gap-3">
+                <span class="text-sm font-medium text-slate-500">ปีการศึกษา:</span>
+                <select id="yearSelect" class="bg-transparent border-none text-sm font-semibold text-slate-700 focus:ring-0 cursor-pointer outline-none">
+                    <option value="All">ทั้งหมด</option>
+                    <!-- ตัวเลือกปีจะถูกใส่เข้ามาด้วย Javascript -->
+                </select>
+            </div>
+        </div>
+
+        <div id="error-message" class="hidden bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-200 shadow-sm flex flex-col gap-2">
+            <div><strong>⚠️ เกิดข้อผิดพลาด:</strong> <span id="error-text"></span></div>
+            <div class="text-red-600 text-xs mt-1">
+                <strong>วิธีแก้ไขเบื้องต้น:</strong><br>
+                1. ตรวจสอบให้แน่ใจว่าไปที่เมนู <b>ไฟล์ (File) > แชร์ (Share) > เผยแพร่ทางเว็บ (Publish to web)</b> ใน Google Sheet แล้ว<br>
+                2. เลือกรูปแบบไฟล์ที่เผยแพร่เป็น <b>"ค่าที่คั่นด้วยจุลภาค (.csv)"</b><br>
+                3. นำลิงก์ที่ได้มาใส่ในตัวแปร <code>GOOGLE_SHEET_CSV_URL</code> อีกครั้ง
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-sky-500">
+                    <i data-lucide="file-text"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500 font-medium">ผลงานทั้งหมด</p>
+                    <p id="stat-total" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-indigo-500">
+                    <i data-lucide="globe"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500 font-medium">ระดับนานาชาติ</p>
+                    <p id="stat-international" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
+                    <i data-lucide="book-open"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500 font-medium">ระดับชาติ</p>
+                    <p id="stat-national" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-amber-500">
+                    <i data-lucide="award"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500 font-medium">Scopus Q1-Q2</p>
+                    <p id="stat-q1q2" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Trend Chart -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-base font-semibold mb-6 text-slate-800">แนวโน้มการตีพิมพ์แยกตามปีการศึกษา</h2>
+                <div class="relative h-72 w-full">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Donut Chart -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col">
+                <h2 class="text-base font-semibold mb-2 text-slate-800">สัดส่วนระดับการตีพิมพ์</h2>
+                <p id="donut-subtitle" class="text-xs text-slate-400 mb-4">ทุกปีการศึกษา</p>
+                <div class="relative flex-1 min-h-[250px] w-full flex justify-center items-center">
+                    <canvas id="donutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tier Summary Table -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mt-6">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-800">สรุปการตีพิมพ์แยกตามฐานข้อมูล (Tier)</h2>
+                    <p class="text-sm text-slate-500 mt-1">จำนวนผลงานจัดกลุ่มตามคุณภาพวารสาร (ไม่รวม Q1, Q2 และ TCI)</p>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-100">
+                            <th class="pb-3 font-semibold text-slate-500 uppercase tracking-wider">Tier / ฐานข้อมูล</th>
+                            <th class="pb-3 font-semibold text-slate-500 text-center">ระดับชาติ (National)</th>
+                            <th class="pb-3 font-semibold text-slate-500 text-center">นานาชาติ (International)</th>
+                            <th class="pb-3 font-semibold text-slate-800 text-right">รวมทั้งหมด</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Content will be injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Word Cloud Section -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mt-6">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
+                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยบ่อยที่สุด (Word Cloud)</p>
+                </div>
+            </div>
+            
+            <!-- Container สำหรับ Word Cloud -->
+            <div id="wordcloud-container" class="w-full flex justify-center items-center h-[350px] relative bg-slate-50/50 rounded-xl">
+                <canvas id="wordCloudCanvas"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // 📌 ใส่ URL CSV จาก Google Sheet ตรงนี้
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmnusNVBtnfg7R5nAs78bf4emExXYqUfokp7vr9TwL71e29j1dO4l-iJocLba4IEE1R4MoS0vh6eEE/pub?output=csv";
+
+        const LEVEL_COLORS = { 'National': '#94a3b8', 'International': '#3b82f6' };
+        const WORDCLOUD_COLORS = ['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#3b82f6', '#14b8a6', '#f43f5e'];
+        
+        let globalData = [];
+        let trendChartInstance = null;
+        let donutChartInstance = null;
+
+        // ข้อมูลตัวอย่าง (Mock Data) ใช้ในกรณีที่ดึงข้อมูลจาก Google Sheet ไม่สำเร็จ
+        const fallbackMockData = [
+            { year_be: 2563, title: "Risk factors for...", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini", "systematic review"] },
+            { year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์...", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์", "พฤติกรรม", "ออนไลน์"] },
+            { year_be: 2565, title: "Ontology Representation...", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma", "biomedical"] },
+            { year_be: 2566, title: "Health literacy and non-recurrence...", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke", "non-recurrence"] },
+            { year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญา...", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน", "ประถมศึกษา"] },
+            { year_be: 2567, title: "Associated factors of...", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"] },
+            { year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุน...", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก", "อาสาสมัคร"] }
+        ];
+
+        // ฟังก์ชันแปลง CSV Text เป็น Array of Objects
+        function parseCSV(str) {
+            const arr = [];
+            let quote = false;
+            let row = 0, col = 0;
+            for (let c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                if (cc === '"' && quote && nc === '"') { arr[row][col] += cc; ++c; continue; }
+                if (cc === '"') { quote = !quote; continue; }
+                if (cc === ',' && !quote) { ++col; continue; }
+                if (cc === '\r' && nc === '\n' && !quote) { ++row; col = 0; ++c; continue; }
+                if (cc === '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc === '\r' && !quote) { ++row; col = 0; continue; }
+                arr[row][col] += cc;
+            }
+            
+            if (arr.length < 2) return [];
+            const headers = arr[0].map(h => h.trim());
+            return arr.slice(1).map((row, index) => {
+                const obj = { id: index + 1 };
+                headers.forEach((h, i) => {
+                    obj[h] = row[i] ? row[i].trim() : '';
+                });
+                return obj;
+            }).filter(d => d.Title); // กรองแถวที่ไม่มี Title ออก
+        }
+
+        // ดึงข้อมูลและเริ่มต้นการทำงาน
+        async function initApp() {
+            try {
+                if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.trim() === "") {
+                    throw new Error("ยังไม่ได้ระบุ URL ของ Google Sheet ในโค้ด");
+                }
+
+                const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                if (!response.ok) throw new Error('การร้องขอข้อมูลถูกปฏิเสธ (CORS) หรือ URL ไม่ถูกต้อง');
+                
+                const csvText = await response.text();
+                
+                // ตรวจสอบว่าหน้าเว็บที่ได้มาเป็นหน้า HTML (Login) แทนที่จะเป็น CSV หรือไม่
+                if (csvText.trim().startsWith("<!DOCTYPE html>")) {
+                     throw new Error('Google Sheet ยังไม่ได้เปิด "เผยแพร่ทางเว็บ (Publish to web)" ระบบจึงบล็อกการเข้าถึง');
+                }
+
+                const parsedData = parseCSV(csvText);
+
+                // แปลงฟิลด์ให้ตรงกับการนำไปใช้ และดึง Keywords
+                globalData = parsedData.map(d => {
+                    const rawKeywords = [d.keyword1, d.keyword2, d.keyword3, d.keyword4, d.keyword5, d.keyword6, d.keyword7];
+                    const cleanedKeywords = rawKeywords
+                        .filter(k => k && k.trim() !== '')
+                        .map(k => k.trim().toLowerCase());
+
+                    return {
+                        year_be: parseInt(d.year_be) || 0,
+                        title: d.Title || '',
+                        type: d.pub_type || '',
+                        level: d.journal_type || 'National',
+                        tier: d.tier || 'NA',
+                        keywords: cleanedKeywords
+                    };
+                });
+
+                document.getElementById('status-text').textContent = "เชื่อมต่อข้อมูลแบบ Real-time สำเร็จ";
+                document.getElementById('status-text').classList.add("text-emerald-500");
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                
+                // แสดงกล่อง Error
+                const errBox = document.getElementById('error-message');
+                errBox.classList.remove('hidden');
+                document.getElementById('error-text').textContent = error.message;
+                
+                // แจ้งเตือนสถานะว่ากำลังใช้ Mock Data
+                document.getElementById('status-text').textContent = "แสดงผลด้วยข้อมูลจำลอง (ระบบไม่สามารถดึงข้อมูลจริงได้)";
+                document.getElementById('status-text').classList.add("text-amber-500");
+                
+                // นำ Mock Data มาใช้เพื่อให้เว็บแสดงผลต่อไปได้
+                globalData = fallbackMockData;
+            } finally {
+                // อัปเดต UI ไม่ว่าจะดึงข้อมูลสำเร็จหรือไม่ก็ตาม
+                setupYearFilter();
+                updateDashboard('All');
+                
+                // ซ่อนโหลดดิ้งเมื่อเสร็จสิ้น
+                document.getElementById('loader').classList.add('hidden');
+            }
+        }
+
+        function setupYearFilter() {
+            const select = document.getElementById('yearSelect');
+            select.innerHTML = '<option value="All">ทั้งหมด</option>'; // Reset options
+            
+            const years = Array.from(new Set(globalData.map(d => d.year_be).filter(y => y > 0))).sort();
+            
+            years.forEach(y => {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                select.appendChild(option);
+            });
+
+            select.removeEventListener('change', handleYearChange); // ป้องกัน Event ซ้ำ
+            select.addEventListener('change', handleYearChange);
+        }
+
+        function handleYearChange(e) {
+            updateDashboard(e.target.value);
+        }
+
+        function updateDashboard(selectedYear) {
+            // กรองข้อมูล
+            const filteredData = selectedYear === 'All' 
+                ? globalData 
+                : globalData.filter(d => d.year_be.toString() === selectedYear);
+
+            // อัปเดตการ์ดสถิติ
+            const total = filteredData.length;
+            const international = filteredData.filter(d => d.level === 'International').length;
+            const national = filteredData.filter(d => d.level === 'National').length;
+            const q1q2 = filteredData.filter(d => ['Q1', 'Q2'].includes(d.tier)).length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-international').textContent = international;
+            document.getElementById('stat-national').textContent = national;
+            document.getElementById('stat-q1q2').textContent = q1q2;
+            
+            document.getElementById('donut-subtitle').textContent = selectedYear === 'All' ? 'ทุกปีการศึกษา' : `ปีการศึกษา ${selectedYear}`;
+
+            // เตรียมข้อมูลกราฟแท่ง
+            const groupedTrend = globalData.reduce((acc, curr) => {
+                const y = curr.year_be;
+                if (!y) return acc;
+                if (!acc[y]) acc[y] = { year: y, National: 0, International: 0 };
+                if (acc[y][curr.level] !== undefined) {
+                    acc[y][curr.level] += 1;
+                }
+                return acc;
+            }, {});
+            const trendDataSorted = Object.values(groupedTrend).sort((a, b) => a.year - b.year);
+            
+            updateTrendChart(trendDataSorted);
+            updateDonutChart([national, international]);
+            
+            // อัปเดตตาราง (กรองข้อมูลไม่ให้รวม Q1, Q2 และ TCI)
+            const allTiers = Array.from(new Set(filteredData.map(d => d.tier)));
+            const targetTiers = allTiers.filter(tier => 
+                tier !== 'Q1' && 
+                tier !== 'Q2' && 
+                !tier.toUpperCase().includes('TCI') && 
+                tier !== 'NA' && tier !== '' 
+            );
+
+            const summary = targetTiers.map(tier => {
+                const items = filteredData.filter(d => d.tier === tier);
+                return {
+                    tier,
+                    total: items.length,
+                    national: items.filter(d => d.level === 'National').length,
+                    international: items.filter(d => d.level === 'International').length
+                };
+            }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
+
+            renderTable(summary);
+
+            // สร้าง Word Cloud
+            renderWordCloud(filteredData);
+        }
+
+        function updateTrendChart(data) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            const labels = data.map(d => d.year);
+            const nationalData = data.map(d => d.National);
+            const internationalData = data.map(d => d.International);
+
+            if (trendChartInstance) trendChartInstance.destroy();
+
+            trendChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'National',
+                            data: nationalData,
+                            backgroundColor: LEVEL_COLORS.National,
+                            borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
+                            borderSkipped: false,
+                            barThickness: 32
+                        },
+                        {
+                            label: 'International',
+                            data: internationalData,
+                            backgroundColor: LEVEL_COLORS.International,
+                            borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
+                            borderSkipped: false,
+                            barThickness: 32
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, grid: { color: '#f1f5f9', borderDash: [3, 3] }, beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
+                        tooltip: { backgroundColor: 'white', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1 }
+                    }
+                }
+            });
+        }
+
+        function updateDonutChart(dataCounts) {
+            const ctx = document.getElementById('donutChart').getContext('2d');
+            
+            if (donutChartInstance) donutChartInstance.destroy();
+
+            donutChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['National', 'International'],
+                    datasets: [{
+                        data: dataCounts,
+                        backgroundColor: [LEVEL_COLORS.National, LEVEL_COLORS.International],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
+                        tooltip: { backgroundColor: 'white', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1 }
+                    }
+                }
+            });
+        }
+
+        function renderTable(summary) {
+            const tbody = document.getElementById('table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (summary.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-slate-400">ไม่มีข้อมูลสำหรับปีที่เลือก หรือไม่มีผลงานในระดับที่กำหนด</td></tr>';
+                return;
+            }
+
+            summary.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-50 last:border-none hover:bg-slate-50/50 transition-colors";
+                
+                let badgeClass = 'bg-slate-100 text-slate-800';
+                if (row.tier.includes('Q')) badgeClass = 'bg-sky-100 text-sky-800';
+                else if (row.tier.includes('TCI')) badgeClass = 'bg-emerald-100 text-emerald-800';
+
+                tr.innerHTML = `
+                    <td class="py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">
+                            ${row.tier}
+                        </span>
+                    </td>
+                    <td class="py-4 text-center text-slate-600">${row.national > 0 ? row.national : '-'}</td>
+                    <td class="py-4 text-center text-slate-600">${row.international > 0 ? row.international : '-'}</td>
+                    <td class="py-4 text-right font-medium text-slate-900">${row.total}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderWordCloud(filteredData) {
+            const wordCounts = {};
+            
+            // นับความถี่ของแต่ละ Keyword
+            filteredData.forEach(d => {
+                if (d.keywords && d.keywords.length > 0) {
+                    d.keywords.forEach(kw => {
+                        wordCounts[kw] = (wordCounts[kw] || 0) + 1;
+                    });
+                }
+            });
+
+            const wordList = Object.keys(wordCounts).map(kw => [kw, wordCounts[kw]]);
+            wordList.sort((a, b) => b[1] - a[1]); // เรียงจากมากไปน้อย
+
+            const container = document.getElementById('wordcloud-container');
+            const canvas = document.getElementById('wordCloudCanvas');
+            
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            if (wordList.length === 0) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '16px Sarabun';
+                ctx.fillStyle = '#94a3b8';
+                ctx.textAlign = 'center';
+                ctx.fillText('ไม่มีข้อมูลคำสำคัญสำหรับปีที่เลือก', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            const maxCount = wordList[0][1];
+            const weightFactor = 50 / maxCount;
+
+            WordCloud(canvas, {
+                list: wordList,
+                fontFamily: 'Sarabun, sans-serif',
+                fontWeight: 'bold',
+                weightFactor: function (size) {
+                    return Math.max(14, size * weightFactor);
+                },
+                color: function () {
+                    return WORDCLOUD_COLORS[Math.floor(Math.random() * WORDCLOUD_COLORS.length)];
+                },
+                rotateRatio: 0.3,
+                rotationSteps: 2,
+                backgroundColor: 'transparent',
+                gridSize: 10,
+                shrinkToFit: true,
+                drawOutOfBound: false
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            if (globalData && globalData.length > 0) {
+                const select = document.getElementById('yearSelect');
+                const filteredData = select.value === 'All' 
+                    ? globalData 
+                    : globalData.filter(d => d.year_be.toString() === select.value);
+                renderWordCloud(filteredData);
+            }
+        });
+
+        // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
