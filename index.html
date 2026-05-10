@@ -322,6 +322,13 @@
 
     </div>
 
+    <!-- Copyright Footer -->
+    <footer class="max-w-7xl mx-auto pb-8 pt-2 text-center border-t border-slate-200 mt-4">
+        <p class="text-sm text-slate-500 font-medium mt-6">
+            &copy; <span id="current-year"></span> Publications Dashboard สาขาสาธารณสุขชุมชน. All rights reserved.
+        </p>
+    </footer>
+
     <script>
         // Initialize Icons
         lucide.createIcons();
@@ -1084,7 +1091,15 @@
         }
 
         // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
-        document.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            
+            // อัปเดตปี Copyright อัตโนมัติ
+            const yearElem = document.getElementById('current-year');
+            if (yearElem) {
+                yearElem.textContent = new Date().getFullYear();
+            }
+        });
     </script>
 </body>
 </html>
