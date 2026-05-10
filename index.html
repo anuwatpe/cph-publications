@@ -209,12 +209,12 @@
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
-                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยบ่อยที่สุด (Top 70)</p>
+                    <p class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัยทั้งหมด (คำนวณจากภาพรวมทุกปีการศึกษา)</p>
                 </div>
             </div>
             
             <!-- Container สำหรับ Word Cloud -->
-            <div id="wordcloud-container" class="w-full flex justify-center items-center h-[380px] relative bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-50">
+            <div id="wordcloud-container" class="w-full flex justify-center items-center h-[450px] relative bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-50">
                 <canvas id="wordCloudCanvas"></canvas>
             </div>
         </div>
@@ -256,19 +256,6 @@
             { year_be: 2567, title: "Associated factors of...", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"] },
             { year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุน...", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"] }
         ];
-
-        // ฟังก์ชันป้องกันการทำงานซ้ำซ้อน (ลดอาการเว็บค้างตอน Resize)
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
 
         function parseCSV(str) {
             const arr = [];
@@ -347,7 +334,11 @@
                 globalData = fallbackMockData;
             } finally {
                 renderYearFilters();
-                updateDashboard();
+                updateDashboard(); // อัปเดต Filter, กราฟสถิติ, ตาราง
+                
+                // วาด Word Cloud ครั้งเดียวตอนเปิดโหลดเว็บ โดยใช้ข้อมูลทั้งหมด (globalData) เสมอ
+                renderWordCloud(globalData);
+                
                 document.getElementById('loader').classList.add('hidden');
             }
         }
@@ -514,8 +505,8 @@
 
             renderTable2568(tableRows);
 
-            // --- 4. สร้าง Word Cloud ---
-            renderWordCloud(filteredData);
+            // หมายเหตุ: ตัดการเรนเดอร์ Word Cloud ออกจาก updateDashboard 
+            // เพื่อไม่ให้วาดใหม่เวลากดเปลี่ยนปี
         }
 
         function updateTrendChart(data) {
@@ -607,7 +598,6 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            // กรณีไม่มีข้อมูล (มีแค่แถว Total ที่รวมค่าได้ 0)
             const hasData = tableRows.length > 1 || (tableRows.length === 1 && tableRows[0].year !== 'รวมทั้งหมด');
             if (!hasData) {
                 tbody.innerHTML = '<tr><td colspan="15" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลสำหรับปีที่เลือก</td></tr>';
@@ -626,7 +616,6 @@
                 const intTotal = row.int_q4 + row.int_q3 + row.int_q2 + row.int_q1 + row.int_pubmed + row.int_proc;
                 const grandTotal = natTotal + intTotal;
 
-                // ฟังก์ชันเปลี่ยนเลข 0 ให้เป็นเส้น ( - ) เพื่อความสบายตา
                 const fmt = (val) => val > 0 ? val : '-';
 
                 tr.innerHTML = `
@@ -653,10 +642,11 @@
             });
         }
 
-        function renderWordCloud(filteredData) {
+        function renderWordCloud(allData) {
             const wordCounts = {};
             
-            filteredData.forEach(d => {
+            // คำนวณความถี่โดยใช้ข้อมูลภาพรวมทั้งหมด (allData) เสมอ
+            allData.forEach(d => {
                 if (d.keywords && d.keywords.length > 0) {
                     d.keywords.forEach(kw => {
                         wordCounts[kw] = (wordCounts[kw] || 0) + 1;
@@ -667,11 +657,12 @@
             let wordList = Object.keys(wordCounts).map(kw => [kw, wordCounts[kw]]);
             wordList.sort((a, b) => b[1] - a[1]); 
             
-            wordList = wordList.slice(0, 70); 
+            // ยกเลิกการตัดคำ (slice) ออก พยายามวาดทุกคำที่มี
 
             const container = document.getElementById('wordcloud-container');
             const canvas = document.getElementById('wordCloudCanvas');
             
+            // Fix ความกว้างความสูงไว้แต่แรก ไม่ต้องอิงจากหน้าต่าง Resize
             canvas.width = container.offsetWidth;
             canvas.height = container.offsetHeight;
 
@@ -681,19 +672,21 @@
                 ctx.font = '16px Sarabun';
                 ctx.fillStyle = '#94a3b8';
                 ctx.textAlign = 'center';
-                ctx.fillText('ไม่มีข้อมูลคำสำคัญสำหรับปีที่เลือก', canvas.width / 2, canvas.height / 2);
+                ctx.fillText('ไม่มีข้อมูลคำสำคัญ', canvas.width / 2, canvas.height / 2);
                 return;
             }
 
             const maxCount = wordList[0][1];
             const weightFactor = maxCount > 0 ? (60 / maxCount) : 1; 
 
+            // สร้าง Word Cloud
             WordCloud(canvas, {
                 list: wordList,
                 fontFamily: 'Sarabun, sans-serif',
                 fontWeight: 'bold',
                 weightFactor: function (size) {
-                    return Math.max(14, size * weightFactor);
+                    // ปรับขนาดฟอนต์ขั้นต่ำให้เล็กลง เพื่อให้คำศัพทย์จำนวนมากๆ สามารถแทรกตัวเข้าไปในช่องว่างได้
+                    return Math.max(4, size * weightFactor);
                 },
                 color: function () {
                     return WORDCLOUD_COLORS[Math.floor(Math.random() * WORDCLOUD_COLORS.length)];
@@ -701,22 +694,11 @@
                 rotateRatio: 0.2, 
                 rotationSteps: 2,
                 backgroundColor: 'transparent',
-                gridSize: 12,
+                gridSize: 4, // ลด gridSize ให้แพ็กคำให้แน่นขึ้นเพื่อให้วาดได้ครบที่สุด
                 shrinkToFit: true,
                 drawOutOfBound: false
             });
         }
-
-        const handleResize = debounce(() => {
-            if (globalData && globalData.length > 0) {
-                const filteredData = selectedYears.size === 0 
-                    ? globalData 
-                    : globalData.filter(d => selectedYears.has(d.year_be.toString()));
-                renderWordCloud(filteredData);
-            }
-        }, 300);
-
-        window.addEventListener('resize', handleResize);
 
         // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
         document.addEventListener('DOMContentLoaded', initApp);
