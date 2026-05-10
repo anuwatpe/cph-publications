@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- WordCloud2.js สำหรับสร้าง Word Cloud -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+    <!-- Vis Network สำหรับสร้าง Network Analysis -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -99,7 +101,7 @@
             </div>
         </div>
 
-        <!-- Author Profile Summary (ย้ายขึ้นมาด้านบน) -->
+        <!-- Author Profile Summary -->
         <div id="author-profile-section" class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl text-white hidden transition-all relative overflow-hidden">
             <!-- Background Decoration -->
             <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
@@ -153,7 +155,7 @@
         </div>
 
         <!-- Stats Cards (Vibrant Gradients) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div class="rounded-2xl p-5 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
                 <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
                     <i data-lucide="file-text" class="w-7 h-7"></i>
@@ -205,7 +207,7 @@
                 </div>
             </div>
 
-            <!-- Donut Chart (อัปเดตเป็น Tiers) -->
+            <!-- Donut Chart -->
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col">
                 <h2 class="text-lg font-bold mb-2 text-slate-800">สัดส่วนการตีพิมพ์แยกตามฐานข้อมูล (Tier)</h2>
                 <p id="donut-subtitle" class="text-sm text-indigo-500 font-medium mb-4">ทุกปีการศึกษา</p>
@@ -227,14 +229,12 @@
             <div class="overflow-x-auto pb-4 hide-scrollbar">
                 <table class="w-full text-left text-xs md:text-sm border-collapse whitespace-nowrap">
                     <thead>
-                        <!-- Header ชั้นที่ 1 -->
                         <tr class="border-y-2 border-slate-200 bg-slate-50">
                             <th rowspan="3" class="p-3 font-bold text-slate-700 border-x border-slate-200 text-center align-middle">ปี<br>(Year)</th>
                             <th colspan="6" class="p-3 font-bold text-emerald-700 text-center border-r border-slate-200">ระดับชาติ (National)</th>
                             <th colspan="7" class="p-3 font-bold text-indigo-700 text-center border-r border-slate-200">ระดับนานาชาติ (International)</th>
                             <th rowspan="3" class="p-3 font-bold text-slate-900 text-center border-r border-slate-200 align-middle shadow-[inset_1px_0_0_#e2e8f0]">รวมทั้งหมด<br>(Total)</th>
                         </tr>
-                        <!-- Header ชั้นที่ 2 -->
                         <tr class="border-b border-slate-200 bg-slate-50/80">
                             <th colspan="4" class="p-2 font-semibold text-emerald-600 text-center border-r border-slate-200">Journal</th>
                             <th rowspan="2" class="p-2 font-semibold text-emerald-600 text-center border-r border-slate-200 align-middle">Proceeding</th>
@@ -244,15 +244,12 @@
                             <th rowspan="2" class="p-2 font-semibold text-indigo-600 text-center border-r border-slate-200 align-middle">Proceeding</th>
                             <th rowspan="2" class="p-2 font-bold text-indigo-700 text-center border-r border-slate-200 align-middle bg-indigo-50/50">Total</th>
                         </tr>
-                        <!-- Header ชั้นที่ 3 -->
                         <tr class="border-b-2 border-slate-200 bg-slate-50/50">
-                            <!-- National Journals -->
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">TCI</th>
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">TCI 3</th>
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">TCI 2</th>
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">TCI 1</th>
                             
-                            <!-- International Journals -->
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">Scopus Q4</th>
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">Scopus Q3</th>
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">Scopus Q2</th>
@@ -261,11 +258,10 @@
                         </tr>
                     </thead>
                     <tbody id="table-body">
-                        <!-- ข้อมูลตารางแบบฟอร์มจะถูกใส่เข้ามาด้วย JS -->
+                        <!-- ข้อมูลจะถูกใส่ด้วย JS -->
                     </tbody>
                 </table>
             </div>
-            <!-- เงาไล่ระดับด้านขวาเพื่อบอกว่าสามารถไถตารางได้ -->
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden rounded-r-3xl"></div>
         </div>
 
@@ -304,10 +300,24 @@
                 </div>
             </div>
             
-            <!-- Container สำหรับ Word Cloud -->
             <div id="wordcloud-container" class="w-full flex justify-center items-center h-[450px] relative bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-50">
                 <canvas id="wordCloudCanvas"></canvas>
             </div>
+        </div>
+
+        <!-- Co-authorship Network Analysis Section (NEW) -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-12">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">เครือข่ายผู้แต่งร่วม (Co-authorship Network Analysis)</h2>
+                    <p id="network-subtitle" class="text-sm text-slate-500 mt-1">วิเคราะห์ความร่วมมือระหว่างบุคคล จากข้อมูลการอ้างอิง (Citation)</p>
+                </div>
+            </div>
+            
+            <div id="coauthor-network-container" class="w-full flex justify-center items-center h-[500px] relative bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-inner">
+                <!-- กราฟเครือข่ายจะถูกวาดที่นี่ -->
+            </div>
+            <p class="text-xs text-slate-400 mt-3 text-center">* สามารถใช้เมาส์ซูมเข้า-ออก หรือลากจุด (Node) เพื่อดูความสัมพันธ์ที่ชัดเจนขึ้นได้</p>
         </div>
 
     </div>
@@ -321,7 +331,6 @@
 
         const LEVEL_COLORS = { 'National': '#10b981', 'International': '#6366f1' };
         
-        // ชุดสีสำหรับแบ่ง Tiers
         const TIER_COLORS = {
             'Q1': '#f97316', 'Q2': '#f59e0b', 'Q3': '#fbbf24', 'Q4': '#fcd34d', 
             'TCI1': '#10b981', 'TCI2': '#34d399', 'TCI3': '#6ee7b7', 'TCI': '#a7f3d0',
@@ -334,21 +343,18 @@
         
         let globalData = [];
         let selectedYears = new Set(); 
-        let selectedAuthor = 'All'; // ตัวแปรเก็บผู้แต่งที่ถูกเลือก
-        let lastWordCloudAuthor = null; // ตัวแปรเช็คว่าเคยวาด Word Cloud ของคนนี้ไปหรือยัง (ลดการวาดซ้ำ)
+        let selectedAuthor = 'All'; 
+        let lastWordCloudAuthor = null; 
         
         let trendChartInstance = null;
         let donutChartInstance = null;
+        let coAuthorNetworkInstance = null; // เก็บ Instance ของ Network
 
-        // ข้อมูลตัวอย่าง (Mock Data เพิ่มฟิลด์ email และ profileImage)
         const fallbackMockData = [
             { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap", researchInterest: "Epidemiology, Public Health, Infectious Diseases" },
             { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์กับพฤติกรรมการเลือกซื้อเครื่องสำอาง", pub_name: "วารสารสาธารณสุขและวิทยาศาสตร์สุขภาพ", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "2", totalCitations: "15", email: "cs@example.com", profileImage: "", researchInterest: "Health Behavior, Consumer Protection" },
-            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"], citation: "-", urlDoi: "", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap", researchInterest: "Epidemiology, Public Health, Infectious Diseases" },
-            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"], citation: "-", urlDoi: "", profileLink: "https://orcid.org", hIndex: "5", totalCitations: "89", email: "", profileImage: "", researchInterest: "Health Literacy, Non-communicable Diseases (NCDs)" },
-            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญาของนักเรียน", pub_name: "วารสารอนามัยสิ่งแวดล้อม และสุขภาพชุมชน", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-", email: "wc@test.com", profileImage: "https://i.pravatar.cc/150?u=wc", researchInterest: "" },
-            { author: "DC", year_be: 2567, title: "Associated factors of non-recurrence stroke", pub_name: "International Journal of Pubilc Health Science", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"], citation: "-", urlDoi: "", profileLink: "https://www.semanticscholar.org", hIndex: "3", totalCitations: "42", email: "", profileImage: "", researchInterest: "Stroke Prevention, Public Health Policy" },
-            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุนที่มีผลต่อการปฏิบัติงาน", pub_name: "วารสารมหาวิทยาลัยคริสเตียน", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-", email: "", profileImage: "", researchInterest: "Health Promotion, Community Health" }
+            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"], citation: "Pengput, A., Smith, J., & Doe, J. (2022). Ontology Representation...", urlDoi: "", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap", researchInterest: "Epidemiology, Public Health, Infectious Diseases" },
+            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"], citation: "Wang, K., Schwartz, D. G., & TC, P. (2023). Health literacy...", urlDoi: "", profileLink: "https://orcid.org", hIndex: "5", totalCitations: "89", email: "", profileImage: "", researchInterest: "Health Literacy, Non-communicable Diseases (NCDs)" }
         ];
 
         function parseCSV(str) {
@@ -402,7 +408,6 @@
                         .filter(k => k && k.trim() !== '')
                         .map(k => k.trim().toLowerCase());
                     
-                    // ดึงชื่อผู้แต่งจากคอลัมน์ name หรือ ชื่อ - สกุล
                     const authorName = d.name || d.Name || d['ชื่อ - สกุล'] || d.author || 'ไม่ระบุชื่อ';
 
                     return {
@@ -417,16 +422,12 @@
                         citation: d.citation || '',
                         urlDoi: d['url-doi'] || d.url_doi || d.url || '',
                         
-                        // ดึงข้อมูลโปรไฟล์และสถิติ (รองรับชื่อคอลัมน์หลายแบบ)
                         profileLink: d.profile || d.Profile || '',
                         hIndex: d['h-index'] || d.h_index || d.hIndex || d['h index'] || '',
                         totalCitations: d.total_citations || d.author_citations || d.citations_count || '',
                         
-                        // เพิ่มดึงอีเมลและรูปภาพ
                         email: d.email || d.Email || d['อีเมล'] || '',
                         profileImage: d.image || d.Image || d.profile_pic || d.pic || d['รูปโปรไฟล์'] || '',
-                        
-                        // เพิ่มดึงความเชี่ยวชาญ/ความสนใจ
                         researchInterest: d.research_interest || d['research interest'] || d.interest || d.Interest || d['ความสนใจ'] || ''
                     };
                 });
@@ -436,7 +437,6 @@
 
             } catch (error) {
                 console.error("Error fetching data:", error);
-                
                 const errBox = document.getElementById('error-message');
                 errBox.classList.remove('hidden');
                 document.getElementById('error-text').textContent = error.message;
@@ -448,7 +448,7 @@
             } finally {
                 renderYearFilters();
                 renderAuthorFilter();
-                updateDashboard(); // อัปเดตข้อมูลทั้งหมดรวมถึง Word Cloud ในครั้งแรก
+                updateDashboard(); 
                 
                 document.getElementById('loader').classList.add('hidden');
             }
@@ -514,7 +514,6 @@
         }
 
         function updateDashboard() {
-            // กรองข้อมูลสถิติ/ตาราง/กราฟ (คิดเงื่อนไขปี + บุคคล)
             const filteredData = globalData.filter(d => {
                 const matchYear = selectedYears.size === 0 || selectedYears.has(d.year_be.toString());
                 const matchAuthor = selectedAuthor === 'All' || d.author === selectedAuthor;
@@ -634,27 +633,31 @@
 
             renderTable2568(tableRows);
 
-            // --- 4. แสดงผลงานรายบุคคล (แสดงเฉพาะเมื่อเลือกบุคคล) ---
+            // --- 4. แสดงผลงานรายบุคคล ---
             renderAuthorPublicationsTable(filteredData);
-            renderAuthorProfileCard(filteredData); // เรียกใช้วาดโปรไฟล์
+            renderAuthorProfileCard(filteredData);
 
-            // --- 5. อัปเดต Word Cloud เฉพาะเมื่อมีการเปลี่ยน "บุคลากร" เท่านั้น ---
-            // (ไม่สนใจว่ากดเปลี่ยนปีหรือไม่ เพราะเราจะดึงข้อมูลทุกปีของคนๆ นั้นเสมอ)
+            // --- 5. อัปเดต Word Cloud & Co-author Network ---
             if (selectedAuthor !== lastWordCloudAuthor) {
-                const wordCloudData = selectedAuthor === 'All' 
+                const authorFilteredData = selectedAuthor === 'All' 
                     ? globalData 
                     : globalData.filter(d => d.author === selectedAuthor);
                 
-                renderWordCloud(wordCloudData);
+                renderWordCloud(authorFilteredData);
+                renderCoAuthorNetwork(authorFilteredData);
+                
                 lastWordCloudAuthor = selectedAuthor;
 
-                // เปลี่ยนข้อความ Subtitle ของกล่อง Word Cloud เพื่อบอกผู้ใช้ว่ากำลังดูของใครอยู่
                 const wcSubtitle = document.getElementById('wordcloud-subtitle');
-                if (wcSubtitle) {
+                const netSubtitle = document.getElementById('network-subtitle');
+                
+                if (wcSubtitle && netSubtitle) {
                     if (selectedAuthor === 'All') {
                         wcSubtitle.textContent = 'คำสำคัญที่ถูกใช้ในงานวิจัย (ภาพรวมของทุกคนในทุกปีการศึกษา)';
+                        netSubtitle.textContent = 'วิเคราะห์ความร่วมมือระหว่างบุคคล จากข้อมูลการอ้างอิงของทุกคน';
                     } else {
                         wcSubtitle.textContent = `คำสำคัญที่ถูกใช้ในงานวิจัยของ: ${selectedAuthor} (รวมทุกปีการศึกษา)`;
+                        netSubtitle.textContent = `วิเคราะห์ความร่วมมือเครือข่ายผู้แต่งร่วมของ: ${selectedAuthor}`;
                     }
                 }
             }
@@ -743,7 +746,6 @@
             });
         }
 
-        // วาดตารางตามแบบฟอร์ม
         function renderTable2568(tableRows) {
             const tbody = document.getElementById('table-body');
             if (!tbody) return;
@@ -793,7 +795,6 @@
             });
         }
 
-        // วาดการ์ดโปรไฟล์ส่วนบุคคล
         function renderAuthorProfileCard(data) {
             const profileSection = document.getElementById('author-profile-section');
             
@@ -802,15 +803,11 @@
                 return;
             }
 
-            // แสดงการ์ด
             profileSection.classList.remove('hidden');
             document.getElementById('profile-name').textContent = selectedAuthor;
 
-            // ดึงข้อมูลแถวแรกของบุคคลนี้เพื่อดึงข้อมูลสถิติ รูปภาพ และอีเมล
-            // (พยายามหาแถวที่มีข้อมูลภาพและอีเมลก่อน เพื่อป้องกันการหยิบแถวที่ว่างมาแสดง)
             let authorInfo = data.find(d => d.profileImage || d.email) || data[0];
 
-            // --- เซ็ตรูปโปรไฟล์ ---
             const imgContainer = document.getElementById('profile-image-container');
             if (authorInfo.profileImage && authorInfo.profileImage.trim() !== '' && authorInfo.profileImage !== 'NA') {
                 imgContainer.innerHTML = `<img src="${authorInfo.profileImage.trim()}" alt="${selectedAuthor}" class="w-full h-full object-cover">`;
@@ -818,7 +815,6 @@
                 imgContainer.innerHTML = `<i data-lucide="user" class="w-12 h-12 text-white/80"></i>`;
             }
 
-            // --- เซ็ตอีเมล ---
             const emailContainer = document.getElementById('profile-email-container');
             const emailSpan = document.getElementById('profile-email');
             if (authorInfo.email && authorInfo.email.trim() !== '' && authorInfo.email !== 'NA') {
@@ -828,12 +824,10 @@
                 emailContainer.classList.add('hidden');
             }
 
-            // --- เซ็ตค่า h-index และ citations ---
             const statInfo = data.find(d => d.hIndex || d.totalCitations) || data[0];
             document.getElementById('profile-hindex').textContent = statInfo.hIndex || '-';
             document.getElementById('profile-citations').textContent = statInfo.totalCitations || '-';
 
-            // --- สร้างปุ่มลิงก์โปรไฟล์ (ถ้ามี) ---
             const linkInfo = data.find(d => d.profileLink && d.profileLink !== 'NA') || data[0];
             const linkContainer = document.getElementById('profile-link-container');
             
@@ -850,7 +844,6 @@
                 linkContainer.innerHTML = `<span class="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full"><i data-lucide="link-2-off" class="w-3.5 h-3.5"></i> ไม่มีข้อมูลลิงก์โปรไฟล์</span>`;
             }
 
-            // --- เซ็ต Research Interest ---
             const interestInfo = data.find(d => d.researchInterest) || data[0];
             const interestContainer = document.getElementById('profile-interest-container');
             const interestSpan = document.getElementById('profile-interest');
@@ -865,7 +858,6 @@
             lucide.createIcons();
         }
 
-        // วาดตารางผลงานรายบุคคล
         function renderAuthorPublicationsTable(data) {
             const section = document.getElementById('author-publications-section');
             const tbody = document.getElementById('author-publications-body');
@@ -873,13 +865,11 @@
             
             if (!section || !tbody) return;
 
-            // ซ่อนตารางถ้าเลือก "บุคลากรทุกคน" (All)
             if (selectedAuthor === 'All') {
                 section.classList.add('hidden');
                 return;
             }
 
-            // แสดงตารางและอัปเดตข้อมูล
             section.classList.remove('hidden');
             subtitle.textContent = `แสดงผลงานของ: ${selectedAuthor}`;
             tbody.innerHTML = '';
@@ -889,7 +879,6 @@
                 return;
             }
 
-            // เรียงปีจากล่าสุดไปเก่าสุด
             const sortedData = [...data].sort((a, b) => b.year_be - a.year_be);
 
             sortedData.forEach(row => {
@@ -930,14 +919,12 @@
                 tbody.appendChild(tr);
             });
             
-            // อัปเดตไอคอนลิงก์ใหม่
             lucide.createIcons();
         }
 
         function renderWordCloud(authorData) {
             const wordCounts = {};
             
-            // นับความถี่โดยใช้ข้อมูลที่ถูกกรองตามชื่อคน (แต่รวมทุกปี)
             authorData.forEach(d => {
                 if (d.keywords && d.keywords.length > 0) {
                     d.keywords.forEach(kw => {
@@ -952,7 +939,6 @@
             const container = document.getElementById('wordcloud-container');
             const canvas = document.getElementById('wordCloudCanvas');
             
-            // Fix ความกว้างความสูงไว้แต่แรก ไม่ต้องอิงจากหน้าต่าง Resize
             canvas.width = container.offsetWidth;
             canvas.height = container.offsetHeight;
 
@@ -969,13 +955,11 @@
             const maxCount = wordList[0][1];
             const weightFactor = maxCount > 0 ? (60 / maxCount) : 1; 
 
-            // สร้าง Word Cloud
             WordCloud(canvas, {
                 list: wordList,
                 fontFamily: 'Sarabun, sans-serif',
                 fontWeight: 'bold',
                 weightFactor: function (size) {
-                    // ปรับขนาดฟอนต์ขั้นต่ำให้เล็กลง เพื่อให้คำศัพทย์จำนวนมากๆ สามารถแทรกตัวเข้าไปในช่องว่างได้
                     return Math.max(4, size * weightFactor);
                 },
                 color: function () {
@@ -988,6 +972,110 @@
                 shrinkToFit: true,
                 drawOutOfBound: false
             });
+        }
+
+        // ฟังก์ชันวาดเครือข่าย Co-Authorship
+        function renderCoAuthorNetwork(authorData) {
+            const nodeFreq = {};
+            const edgeMap = {};
+
+            // ดึงชื่อผู้แต่งจาก Citation
+            authorData.forEach(d => {
+                if (d.citation && d.citation.length > 10 && d.citation !== '-') {
+                    // ใช้ Regex เพื่อหาข้อความก่อนเจอวงเล็บปี (YYYY) เช่น "(2020)"
+                    const match = d.citation.match(/^(.*?)\s*\(\d{4}\)/);
+                    let authorStr = match ? match[1] : d.citation.split('.')[0];
+                    
+                    if (authorStr) {
+                        // แยกชื่อผู้แต่งออกด้วยลูกน้ำ หรือเครื่องหมาย &
+                        let rawAuthors = authorStr.split(/\.,\s*(?:&\s*)?|\s+&\s+/);
+                        // ลบจุดและลูกน้ำออกให้เหลือแต่ชื่อ แล้วกรองตัวที่ว่างออก
+                        let authors = rawAuthors.map(a => a.replace(/[.,&]/g, '').trim()).filter(a => a.length > 2);
+                        
+                        // นับความถี่แต่ละบุคคล
+                        authors.forEach(a => {
+                            nodeFreq[a] = (nodeFreq[a] || 0) + 1;
+                        });
+
+                        // สร้างการเชื่อมต่อ (Edge) ระหว่างคู่คนแต่งในเปเปอร์เดียวกัน
+                        for (let i = 0; i < authors.length; i++) {
+                            for (let j = i + 1; j < authors.length; j++) {
+                                const edgeKey = [authors[i], authors[j]].sort().join('|||');
+                                edgeMap[edgeKey] = (edgeMap[edgeKey] || 0) + 1;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // เอาเฉพาะ Top 40 คนที่ทำงานวิจัยบ่อยสุด เพื่อไม่ให้กราฟดูรกเกินไป
+            let topAuthors = Object.entries(nodeFreq)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 40)
+                .map(e => e[0]);
+
+            const validNodes = new Set(topAuthors);
+            const container = document.getElementById('coauthor-network-container');
+
+            if (topAuthors.length <= 1) {
+                container.innerHTML = '<div class="text-slate-400 font-medium">ไม่มีข้อมูลอ้างอิง (Citation) เพียงพอสำหรับสร้างเครือข่ายผู้แต่งร่วม</div>';
+                return;
+            } else {
+                container.innerHTML = '';
+            }
+
+            // จัดรูปแบบจุด Nodes
+            const nodes = topAuthors.map(author => {
+                return {
+                    id: author,
+                    label: author,
+                    value: nodeFreq[author],
+                    title: `<b>${author}</b><br>ผลงานในเครือข่าย: ${nodeFreq[author]} เรื่อง`,
+                    color: {
+                        background: '#10b981', // สีเขียวมรกต
+                        border: '#ffffff',
+                        highlight: { background: '#f59e0b', border: '#ffffff' }
+                    }
+                };
+            });
+
+            // จัดรูปแบบเส้น Edges
+            const edges = [];
+            Object.entries(edgeMap).forEach(([edgeKey, weight]) => {
+                const [a1, a2] = edgeKey.split('|||');
+                if (validNodes.has(a1) && validNodes.has(a2)) {
+                    edges.push({
+                        from: a1,
+                        to: a2,
+                        value: weight, // น้ำหนักเส้นตามจำนวนเปเปอร์ที่ทำด้วยกัน
+                        title: `ร่วมงานกัน: ${weight} ครั้ง`,
+                        color: { color: 'rgba(148, 163, 184, 0.5)', highlight: '#f59e0b' }
+                    });
+                }
+            });
+
+            const data = { nodes: nodes, edges: edges };
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    scaling: { min: 10, max: 35 },
+                    font: { size: 12, face: 'Sarabun', color: '#334155', strokeWidth: 2, strokeColor: '#ffffff' },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: { smooth: { type: 'continuous' } },
+                physics: {
+                    barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 150 },
+                    stabilization: { iterations: 150 }
+                },
+                interaction: { hover: true, tooltipDelay: 100, zoomView: true }
+            };
+
+            // วาดกราฟลงหน้าเว็บ
+            if (coAuthorNetworkInstance) {
+                coAuthorNetworkInstance.destroy();
+            }
+            coAuthorNetworkInstance = new vis.Network(container, data, options);
         }
 
         // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
