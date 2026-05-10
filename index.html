@@ -254,6 +254,19 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Research Interest (NEW) -->
+            <div id="profile-interest-container" class="relative z-10 mt-6 pt-5 border-t border-white/10 hidden">
+                <div class="flex items-start gap-3">
+                    <div class="mt-0.5 bg-indigo-500/20 p-2 rounded-xl border border-indigo-400/20 text-indigo-300">
+                        <i data-lucide="lightbulb" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1.5">Research Interest / ความเชี่ยวชาญ</h3>
+                        <p class="text-sm md:text-base font-medium text-slate-100 leading-relaxed" id="profile-interest">-</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Individual Publications Table -->
@@ -329,13 +342,13 @@
 
         // ข้อมูลตัวอย่าง (Mock Data เพิ่มฟิลด์ email และ profileImage)
         const fallbackMockData = [
-            { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap" },
-            { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์กับพฤติกรรมการเลือกซื้อเครื่องสำอาง", pub_name: "วารสารสาธารณสุขและวิทยาศาสตร์สุขภาพ", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "2", totalCitations: "15", email: "cs@example.com", profileImage: "" },
-            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"], citation: "-", urlDoi: "", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap" },
-            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"], citation: "-", urlDoi: "", profileLink: "https://orcid.org", hIndex: "5", totalCitations: "89", email: "", profileImage: "" },
-            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญาของนักเรียน", pub_name: "วารสารอนามัยสิ่งแวดล้อม และสุขภาพชุมชน", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-", email: "wc@test.com", profileImage: "https://i.pravatar.cc/150?u=wc" },
-            { author: "DC", year_be: 2567, title: "Associated factors of non-recurrence stroke", pub_name: "International Journal of Pubilc Health Science", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"], citation: "-", urlDoi: "", profileLink: "https://www.semanticscholar.org", hIndex: "3", totalCitations: "42", email: "", profileImage: "" },
-            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุนที่มีผลต่อการปฏิบัติงาน", pub_name: "วารสารมหาวิทยาลัยคริสเตียน", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-", email: "", profileImage: "" }
+            { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap", researchInterest: "Epidemiology, Public Health, Infectious Diseases" },
+            { author: "CS", year_be: 2564, title: "ปัจจัยที่มีความสัมพันธ์กับพฤติกรรมการเลือกซื้อเครื่องสำอาง", pub_name: "วารสารสาธารณสุขและวิทยาศาสตร์สุขภาพ", type: "Journal", level: "National", tier: "TCI2", keywords: ["ปัจจัย", "ความสัมพันธ์"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "2", totalCitations: "15", email: "cs@example.com", profileImage: "", researchInterest: "Health Behavior, Consumer Protection" },
+            { author: "AP", year_be: 2565, title: "Ontology Representation for Cholangiocarcinoma", pub_name: "Conference on Biomedical Ontology 2022", type: "Proceeding", level: "International", tier: "Proceeding", keywords: ["ontology", "cholangiocarcinoma"], citation: "-", urlDoi: "", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap", researchInterest: "Epidemiology, Public Health, Infectious Diseases" },
+            { author: "TC", year_be: 2566, title: "Health literacy and non-recurrence of stroke", pub_name: "Journal of Southwest Jiaotong University", type: "Journal", level: "International", tier: "Q2", keywords: ["health literacy", "stroke"], citation: "-", urlDoi: "", profileLink: "https://orcid.org", hIndex: "5", totalCitations: "89", email: "", profileImage: "", researchInterest: "Health Literacy, Non-communicable Diseases (NCDs)" },
+            { author: "WC", year_be: 2567, title: "ปัจจัยที่สัมพันธ์กับระดับเชาว์ปัญญาของนักเรียน", pub_name: "วารสารอนามัยสิ่งแวดล้อม และสุขภาพชุมชน", type: "Journal", level: "National", tier: "TCI3", keywords: ["เชาว์ปัญญา", "นักเรียน"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-", email: "wc@test.com", profileImage: "https://i.pravatar.cc/150?u=wc", researchInterest: "" },
+            { author: "DC", year_be: 2567, title: "Associated factors of non-recurrence stroke", pub_name: "International Journal of Pubilc Health Science", type: "Journal", level: "International", tier: "Q4", keywords: ["associated factors", "stroke"], citation: "-", urlDoi: "", profileLink: "https://www.semanticscholar.org", hIndex: "3", totalCitations: "42", email: "", profileImage: "", researchInterest: "Stroke Prevention, Public Health Policy" },
+            { author: "TH", year_be: 2568, title: "ปัจจัยส่วนบุคคลและแรงสนับสนุนที่มีผลต่อการปฏิบัติงาน", pub_name: "วารสารมหาวิทยาลัยคริสเตียน", type: "Journal", level: "National", tier: "TCI1", keywords: ["ปัจจัยส่วนบุคคล", "ไข้เลือดออก"], citation: "-", urlDoi: "", profileLink: "NA", hIndex: "-", totalCitations: "-", email: "", profileImage: "", researchInterest: "Health Promotion, Community Health" }
         ];
 
         function parseCSV(str) {
@@ -411,7 +424,10 @@
                         
                         // เพิ่มดึงอีเมลและรูปภาพ
                         email: d.email || d.Email || d['อีเมล'] || '',
-                        profileImage: d.image || d.Image || d.profile_pic || d.pic || d['รูปโปรไฟล์'] || ''
+                        profileImage: d.image || d.Image || d.profile_pic || d.pic || d['รูปโปรไฟล์'] || '',
+                        
+                        // เพิ่มดึงความเชี่ยวชาญ/ความสนใจ
+                        researchInterest: d.research_interest || d['research interest'] || d.interest || d.Interest || d['ความสนใจ'] || ''
                     };
                 });
 
@@ -832,6 +848,18 @@
                 linkContainer.innerHTML = `<a href="${url}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-full transition-colors shadow-sm"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> ${btnLabel}</a>`;
             } else {
                 linkContainer.innerHTML = `<span class="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full"><i data-lucide="link-2-off" class="w-3.5 h-3.5"></i> ไม่มีข้อมูลลิงก์โปรไฟล์</span>`;
+            }
+
+            // --- เซ็ต Research Interest ---
+            const interestInfo = data.find(d => d.researchInterest) || data[0];
+            const interestContainer = document.getElementById('profile-interest-container');
+            const interestSpan = document.getElementById('profile-interest');
+            
+            if (interestInfo.researchInterest && interestInfo.researchInterest.trim() !== '' && interestInfo.researchInterest !== 'NA') {
+                interestContainer.classList.remove('hidden');
+                interestSpan.textContent = interestInfo.researchInterest.trim();
+            } else {
+                interestContainer.classList.add('hidden');
             }
             
             lucide.createIcons();
