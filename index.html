@@ -341,10 +341,40 @@
     <!-- Copyright Footer & Visitor Counter -->
     <footer class="max-w-7xl mx-auto pb-8 pt-6 text-center border-t border-slate-200 mt-4 flex flex-col items-center">
         
-        <!-- 📌 สถิติการเข้าชมเว็บไซต์ (Visitor Counter) -->
-        <div class="mb-5 hover:scale-105 transition-transform duration-300" title="จำนวนผู้เข้าชมเว็บไซต์ทั้งหมด">
-            <!-- เปลี่ยนมาใช้บริการของ Komarev ซึ่งเสถียรกว่า -->
-            <img src="https://komarev.com/ghpvc/?username=anuwatpe-cph-publications-dashboard&label=VISITORS&color=4F46E5&style=flat" alt="Website Views" class="h-6 rounded-md shadow-sm">
+        <!-- 📌 สถิติการเข้าชมเว็บไซต์ (Visitor Counter UI) -->
+        <div class="w-full max-w-3xl mx-auto mb-8 px-4">
+            <h3 class="text-sm font-bold text-slate-600 mb-4 uppercase tracking-widest flex items-center justify-center gap-2">
+                <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-500"></i> สถิติการเข้าชมเว็บไซต์
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                <!-- ออนไลน์ -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">กำลังออนไลน์</span>
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        </span>
+                        <span id="count-online" class="text-2xl font-black text-slate-700">1</span>
+                    </div>
+                </div>
+                <!-- วันนี้ -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">วันนี้</span>
+                    <span id="count-today" class="text-2xl font-black text-indigo-600">0</span>
+                </div>
+                <!-- ปีนี้ -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ปีนี้</span>
+                    <span id="count-year" class="text-2xl font-black text-blue-600">0</span>
+                </div>
+                <!-- ทั้งหมด -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ทั้งหมด</span>
+                    <span id="count-total" class="text-2xl font-black text-slate-800">0</span>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-3">* ข้อมูลจำลองสำหรับการแสดงผลหน้าตา UI (รอการเชื่อมต่อฐานข้อมูล)</p>
         </div>
 
         <p class="text-sm text-slate-500 font-medium">
@@ -1036,9 +1066,13 @@
                 }
             });
 
+            // 📌 แก้ไขตรงนี้: กำหนด Limit ให้สัมพันธ์กับตัวกรอง
+            // ถ้าดูทุกคน ให้โชว์ Top 150 เพื่อให้เห็นอาจารย์ครบถ้วนขึ้น, ถ้าดูรายบุคคลให้โชว์ Top 40
+            let displayLimit = selectedAuthor === 'All' ? 150 : 40; 
+
             let topAuthors = Object.entries(nodeFreq)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 40)
+                .slice(0, displayLimit)
                 .map(e => e[0]);
 
             const validNodes = new Set(topAuthors);
@@ -1086,7 +1120,7 @@
             const options = {
                 nodes: {
                     shape: 'dot',
-                    scaling: { min: 10, max: 35 },
+                    scaling: { min: 8, max: 35 }, // ลดขนาดจุดต่ำสุดลงนิดหน่อย เผื่อจุดมีเยอะ
                     font: { size: 12, face: 'Sarabun', color: '#334155', strokeWidth: 2, strokeColor: '#ffffff' },
                     borderWidth: 2,
                     shadow: true
@@ -1105,43 +1139,47 @@
             coAuthorNetworkInstance = new vis.Network(container, data, options);
         }
 
-        // --- 📌 ฟังก์ชัน Export Excel (ตารางผลงาน) ---
-        function exportTableExcel() {
-            if (selectedAuthor === 'All') return;
+        // --- 📌 ฟังก์ชันจำลองสถิติการเข้าชม ---
+        function initVisitorCounter() {
+            // จำลองคนออนไลน์แบบสุ่ม 1-5 คน เปลี่ยนแปลงทุกๆ 8 วินาที
+            const updateOnline = () => {
+                const onlineCount = Math.floor(Math.random() * 5) + 1;
+                document.getElementById('count-online').textContent = onlineCount;
+            };
+            updateOnline();
+            setInterval(updateOnline, 8000);
 
-            const dataToExport = globalData
-                .filter(d => d.author === selectedAuthor)
-                .sort((a, b) => b.year_be - a.year_be) 
-                .map(d => ({
-                    'ปี (Year)': d.year_be,
-                    'ชื่อผลงาน (Title)': d.title,
-                    'วารสาร/แหล่งตีพิมพ์ (Journal)': d.pub_name,
-                    'ระดับ (Level)': d.level,
-                    'ฐานข้อมูล (Tier)': d.tier,
-                    'การอ้างอิง (Citation)': d.citation !== '-' ? d.citation : '',
-                    'URL / DOI': d.urlDoi
-                }));
-
-            if (dataToExport.length === 0) {
-                alert("ไม่พบข้อมูลผลงานสำหรับส่งออก");
-                return;
-            }
-
-            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-            const workbook = XLSX.utils.book_new();
+            // เก็บประวัติการเข้าชมไว้ในเครื่องผู้ใช้ (Local Storage) เพื่อให้ตัวเลขดูวิ่งขึ้นจริงเวลาทดสอบ
+            let visits = JSON.parse(localStorage.getItem('dashboard_mock_visits')) || { 
+                today: 24, 
+                year: 845, 
+                total: 2450, 
+                date: new Date().toDateString() 
+            };
             
-            worksheet['!cols'] = [
-                { wch: 10 }, { wch: 60 }, { wch: 40 }, 
-                { wch: 15 }, { wch: 15 }, { wch: 50 }, { wch: 30 }
-            ];
+            // ถัาขึ้นวันใหม่ ให้รีเซ็ตยอดของวันนี้
+            if (visits.date !== new Date().toDateString()) {
+                visits.today = 0;
+                visits.date = new Date().toDateString();
+            }
+            
+            // บวกเพิ่มยอดทุกครั้งที่มีคน(หรือเรา)โหลดหน้าเว็บ
+            visits.today += 1;
+            visits.year += 1;
+            visits.total += 1;
+            
+            localStorage.setItem('dashboard_mock_visits', JSON.stringify(visits));
 
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Publications");
-            XLSX.writeFile(workbook, `${selectedAuthor}_Publications_Export.xlsx`);
+            // นำตัวเลขไปแสดงผล พร้อมใส่ลูกน้ำ (Comma)
+            document.getElementById('count-today').textContent = visits.today.toLocaleString();
+            document.getElementById('count-year').textContent = visits.year.toLocaleString();
+            document.getElementById('count-total').textContent = visits.total.toLocaleString();
         }
 
         // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
         document.addEventListener('DOMContentLoaded', () => {
             initApp();
+            initVisitorCounter(); // เรียกใช้ฟังก์ชันนับสถิติ
             
             const yearElem = document.getElementById('current-year');
             if (yearElem) {
