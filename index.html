@@ -1067,8 +1067,8 @@
             });
 
             // 📌 แก้ไขตรงนี้: กำหนด Limit ให้สัมพันธ์กับตัวกรอง
-            // ถ้าดูทุกคน ให้โชว์ Top 150 เพื่อให้เห็นอาจารย์ครบถ้วนขึ้น, ถ้าดูรายบุคคลให้โชว์ Top 40
-            let displayLimit = selectedAuthor === 'All' ? 150 : 40; 
+            // ถ้าดูทุกคน ให้โชว์ Top 200 เพื่อให้เห็นอาจารย์ครบถ้วนขึ้น, ถ้าดูรายบุคคลให้โชว์ Top 80
+            let displayLimit = selectedAuthor === 'All' ? 200 : 80; 
 
             let topAuthors = Object.entries(nodeFreq)
                 .sort((a, b) => b[1] - a[1])
