@@ -281,7 +281,7 @@
                 <i data-lucide="info" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"></i>
                 <p class="text-xs text-slate-600 leading-relaxed">
                     <strong class="text-blue-700">เกณฑ์การนับจำนวน:</strong> กรณีที่ผลงาน 1 เรื่อง ถูกตีพิมพ์หรือปรากฏอยู่ในหลายฐานข้อมูล (เช่น เป็นทั้ง <em>Proceeding</em> และ <em>Scopus Q3</em>) 
-                    ระบบจะนับยอดในตารางสรุปนี้เพียง <strong>1 ครั้ง ในฐานข้อมูลที่ระดับสูงสุด</strong> (Q1 > Q2 > Q3 > Q4 > TCI > PubMed > Proceeding) เพื่อป้องกันการนับยอดรวมซ้ำซ้อน 
+                    ระบบจะนับยอดในตารางสรุปนี้เพียง <strong>1 ครั้ง ในฐานข้อมูลที่ระดับสูงสุด</strong> (Q1 &gt; Q2 &gt; Q3 &gt; Q4 &gt; PubMed &gt; TCI &gt; International Proceeding &gt; National Proceeding) เพื่อป้องกันการนับยอดรวมซ้ำซ้อน 
                     <br><span class="text-slate-500">*ท่านสามารถดูฐานข้อมูลทั้งหมดของแต่ละผลงานได้ที่ตารางรายบุคคลด้านล่าง</span>
                 </p>
             </div>
@@ -405,9 +405,12 @@
 
         const LEVEL_COLORS = { 'National': '#10b981', 'International': '#6366f1' };
         
+        // เพิ่มสีให้กับ Int. Proceeding และ Nat. Proceeding
         const TIER_COLORS = {
             'Q1': '#f97316', 'Q2': '#f59e0b', 'Q3': '#fbbf24', 'Q4': '#fcd34d', 
             'TCI1': '#10b981', 'TCI2': '#34d399', 'TCI3': '#6ee7b7', 'TCI': '#a7f3d0',
+            'INT_PROCEEDING': '#6366f1', 
+            'NAT_PROCEEDING': '#818cf8',
             'PROCEEDING': '#818cf8', 
             'PUBMED': '#ec4899', 'PMC': '#f472b6', 
             'NA': '#cbd5e1'
@@ -632,6 +635,10 @@
                 let tierStr = (d.tier || '').toUpperCase();
                 let typeStr = (d.type || '').toUpperCase();
                 let tags = tierStr.split(',').map(t => t.trim());
+                
+                // ตรวจสอบระดับ (Level) ของผลงาน
+                const level = (d.level || '').toUpperCase();
+
                 if (typeStr.includes('PROCEEDING') && !tags.includes('PROCEEDING')) tags.push('PROCEEDING');
                 
                 let primaryTier = 'NA';
@@ -639,17 +646,20 @@
                 else if (tags.some(t => t.includes('Q2'))) primaryTier = 'Q2';
                 else if (tags.some(t => t.includes('Q3'))) primaryTier = 'Q3';
                 else if (tags.some(t => t.includes('Q4'))) primaryTier = 'Q4';
+                else if (tags.some(t => t.includes('PUBMED') || t.includes('PMC'))) primaryTier = 'PUBMED';
                 else if (tags.some(t => t.includes('TCI1'))) primaryTier = 'TCI1';
                 else if (tags.some(t => t.includes('TCI2'))) primaryTier = 'TCI2';
                 else if (tags.some(t => t.includes('TCI3'))) primaryTier = 'TCI3';
                 else if (tags.some(t => t === 'TCI')) primaryTier = 'TCI';
-                else if (tags.some(t => t.includes('PUBMED') || t.includes('PMC'))) primaryTier = 'PUBMED';
-                else if (tags.some(t => t.includes('PROCEEDING'))) primaryTier = 'PROCEEDING';
+                else if (tags.some(t => t.includes('PROCEEDING'))) {
+                    // แยกระดับ International และ National ของ Proceeding
+                    primaryTier = level === 'INTERNATIONAL' ? 'INT_PROCEEDING' : 'NAT_PROCEEDING';
+                }
                 
                 tierCounts[primaryTier] = (tierCounts[primaryTier] || 0) + 1;
             });
             
-            const tierOrder = ['Q1', 'Q2', 'Q3', 'Q4', 'TCI1', 'TCI2', 'TCI3', 'TCI', 'PROCEEDING', 'PUBMED', 'PMC', 'NA'];
+            const tierOrder = ['Q1', 'Q2', 'Q3', 'Q4', 'PUBMED', 'PMC', 'TCI1', 'TCI2', 'TCI3', 'TCI', 'INT_PROCEEDING', 'NAT_PROCEEDING', 'PROCEEDING', 'NA'];
             const sortedTiers = Object.keys(tierCounts).sort((a, b) => {
                 const idxA = tierOrder.indexOf(a);
                 const idxB = tierOrder.indexOf(b);
@@ -664,7 +674,12 @@
             const donutColors = [];
 
             sortedTiers.forEach(t => {
-                donutLabels.push(t);
+                // แปลงชื่อให้แสดงผลในกราฟโดนัทได้สวยงาม
+                let label = t;
+                if (t === 'INT_PROCEEDING') label = 'Int. Proceeding';
+                if (t === 'NAT_PROCEEDING') label = 'Nat. Proceeding';
+
+                donutLabels.push(label);
                 donutData.push(tierCounts[t]);
                 donutColors.push(TIER_COLORS[t] || '#94a3b8');
             });
@@ -690,20 +705,32 @@
                 let tags = tierStr.split(',').map(t => t.trim());
                 if (typeStr.includes('PROCEEDING') && !tags.includes('PROCEEDING')) tags.push('PROCEEDING');
 
-                if (level === 'NATIONAL') {
-                    if (tags.some(t => t.includes('TCI1'))) stat.nat_tci1++;
-                    else if (tags.some(t => t.includes('TCI2'))) stat.nat_tci2++;
-                    else if (tags.some(t => t.includes('TCI3'))) stat.nat_tci3++;
-                    else if (tags.some(t => t === 'TCI')) stat.nat_tci++;
-                    else if (tags.some(t => t.includes('PROCEEDING'))) stat.nat_proc++;
-                } else if (level === 'INTERNATIONAL') {
-                    if (tags.some(t => t.includes('Q1'))) stat.int_q1++;
-                    else if (tags.some(t => t.includes('Q2'))) stat.int_q2++;
-                    else if (tags.some(t => t.includes('Q3'))) stat.int_q3++;
-                    else if (tags.some(t => t.includes('Q4'))) stat.int_q4++;
-                    else if (tags.some(t => t.includes('PUBMED') || t.includes('PMC'))) stat.int_pubmed++;
-                    else if (tags.some(t => t.includes('PROCEEDING'))) stat.int_proc++;
+                let highestTier = 'NA';
+                if (tags.some(t => t.includes('Q1'))) highestTier = 'Q1';
+                else if (tags.some(t => t.includes('Q2'))) highestTier = 'Q2';
+                else if (tags.some(t => t.includes('Q3'))) highestTier = 'Q3';
+                else if (tags.some(t => t.includes('Q4'))) highestTier = 'Q4';
+                else if (tags.some(t => t.includes('PUBMED') || t.includes('PMC'))) highestTier = 'PUBMED';
+                else if (tags.some(t => t.includes('TCI1'))) highestTier = 'TCI1';
+                else if (tags.some(t => t.includes('TCI2'))) highestTier = 'TCI2';
+                else if (tags.some(t => t.includes('TCI3'))) highestTier = 'TCI3';
+                else if (tags.some(t => t === 'TCI')) highestTier = 'TCI';
+                else if (tags.some(t => t.includes('PROCEEDING'))) {
+                    // ตัดสิน Proceeding ตาม Level
+                    highestTier = level === 'INTERNATIONAL' ? 'INT_PROCEEDING' : 'NAT_PROCEEDING';
                 }
+
+                if (highestTier === 'Q1') stat.int_q1++;
+                else if (highestTier === 'Q2') stat.int_q2++;
+                else if (highestTier === 'Q3') stat.int_q3++;
+                else if (highestTier === 'Q4') stat.int_q4++;
+                else if (highestTier === 'PUBMED') stat.int_pubmed++;
+                else if (highestTier === 'TCI1') stat.nat_tci1++;
+                else if (highestTier === 'TCI2') stat.nat_tci2++;
+                else if (highestTier === 'TCI3') stat.nat_tci3++;
+                else if (highestTier === 'TCI') stat.nat_tci++;
+                else if (highestTier === 'INT_PROCEEDING') stat.int_proc++; 
+                else if (highestTier === 'NAT_PROCEEDING') stat.nat_proc++; 
             });
 
             const tableRows = Object.values(yearStats).sort((a,b) => a.year - b.year);
