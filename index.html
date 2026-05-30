@@ -1020,10 +1020,12 @@
                 let rawTiers = (row.tier || '').split(',').map(t => t.trim().toUpperCase()).filter(t => t !== '' && t !== 'NA');
                 let typeStr = (row.type || '').toUpperCase();
                 
-                // ถ้าระบุ type เป็น Proceeding แต่ไม่ได้เขียนลงในคอลัมน์ tier ให้เพิ่มเข้าไปโชว์ด้วย
-                if (typeStr.includes('PROCEEDING') && !rawTiers.includes('PROCEEDING')) {
+                // 📌 [แก้ไขแล้ว] ตรวจสอบว่ามีคำว่า PROCEEDING อยู่ในป้ายใดป้ายหนึ่งแล้วหรือยัง
+                // ถ้ายังไม่มี และประเภทผลงานคือ Proceeding ค่อยเพิ่มป้ายเข้าไป
+                if (typeStr.includes('PROCEEDING') && !rawTiers.some(t => t.includes('PROCEEDING'))) {
                     rawTiers.push('PROCEEDING');
                 }
+                
                 if (rawTiers.length === 0) rawTiers.push('-');
 
                 rawTiers.forEach(t => {
@@ -1033,7 +1035,17 @@
                     else if (t.includes('PROCEEDING')) badgeClass = 'bg-indigo-100 text-indigo-700';
                     else if (t.includes('PUBMED') || t.includes('PMC')) badgeClass = 'bg-pink-100 text-pink-700';
 
-                    tierHtml += `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold ${badgeClass} shadow-sm border border-white/50">${t}</span>`;
+                    // 📌 [เพิ่มใหม่] จัดหน้าตาข้อความให้อ่านง่ายและไม่ยาวเกินไป
+                    let displayText = t;
+                    if (t === 'INTERNATIONAL PROCEEDING' || t === 'INT_PROCEEDING') displayText = 'Int. Proceeding';
+                    else if (t === 'NATIONAL PROCEEDING' || t === 'NAT_PROCEEDING') displayText = 'Nat. Proceeding';
+                    else if (t === 'PROCEEDING') {
+                        // ถ้าระบุแค่ PROCEEDING เฉยๆ ให้ดึง Level มาช่วยแสดงผล
+                        const levelStr = (row.level || '').toUpperCase();
+                        displayText = levelStr === 'INTERNATIONAL' ? 'Int. Proceeding' : 'Nat. Proceeding';
+                    }
+
+                    tierHtml += `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold ${badgeClass} shadow-sm border border-white/50">${displayText}</span>`;
                 });
                 tierHtml += '</div>';
 
