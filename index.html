@@ -586,7 +586,12 @@
             const total = filteredData.length;
             const international = filteredData.filter(d => d.level === 'International').length;
             const national = filteredData.filter(d => d.level === 'National').length;
-            const q1q2 = filteredData.filter(d => ['Q1', 'Q2'].includes(d.tier)).length;
+            
+            // นับ Q1, Q2 โดยครอบคลุมกรณีที่มีหลายฐานใน 1 เปเปอร์
+            const q1q2 = filteredData.filter(d => {
+                const t = (d.tier || '').toUpperCase();
+                return t.includes('Q1') || t.includes('Q2');
+            }).length;
 
             document.getElementById('stat-total').textContent = total;
             document.getElementById('stat-international').textContent = international;
@@ -610,13 +615,27 @@
             const trendDataSorted = Object.values(groupedTrend).sort((a, b) => a.year - b.year);
             updateTrendChart(trendDataSorted);
             
-            // --- 2. เตรียมข้อมูลกราฟโดนัท ---
+            // --- 2. เตรียมข้อมูลกราฟโดนัท (เลือก Tier ที่สูงที่สุดเป็น Primary เพื่อไม่นับซ้ำ) ---
             const tierCounts = {};
             filteredData.forEach(d => {
-                let t = d.tier ? d.tier.toUpperCase().trim() : 'NA';
-                if (t === '') t = 'NA';
-                if (t.includes('PROCEEDING') || (d.type && d.type.toUpperCase().includes('PROCEEDING'))) t = 'PROCEEDING';
-                tierCounts[t] = (tierCounts[t] || 0) + 1;
+                let tierStr = (d.tier || '').toUpperCase();
+                let typeStr = (d.type || '').toUpperCase();
+                let tags = tierStr.split(',').map(t => t.trim());
+                if (typeStr.includes('PROCEEDING') && !tags.includes('PROCEEDING')) tags.push('PROCEEDING');
+                
+                let primaryTier = 'NA';
+                if (tags.some(t => t.includes('Q1'))) primaryTier = 'Q1';
+                else if (tags.some(t => t.includes('Q2'))) primaryTier = 'Q2';
+                else if (tags.some(t => t.includes('Q3'))) primaryTier = 'Q3';
+                else if (tags.some(t => t.includes('Q4'))) primaryTier = 'Q4';
+                else if (tags.some(t => t.includes('TCI1'))) primaryTier = 'TCI1';
+                else if (tags.some(t => t.includes('TCI2'))) primaryTier = 'TCI2';
+                else if (tags.some(t => t.includes('TCI3'))) primaryTier = 'TCI3';
+                else if (tags.some(t => t === 'TCI')) primaryTier = 'TCI';
+                else if (tags.some(t => t.includes('PUBMED') || t.includes('PMC'))) primaryTier = 'PUBMED';
+                else if (tags.some(t => t.includes('PROCEEDING'))) primaryTier = 'PROCEEDING';
+                
+                tierCounts[primaryTier] = (tierCounts[primaryTier] || 0) + 1;
             });
             
             const tierOrder = ['Q1', 'Q2', 'Q3', 'Q4', 'TCI1', 'TCI2', 'TCI3', 'TCI', 'PROCEEDING', 'PUBMED', 'PMC', 'NA'];
@@ -641,7 +660,7 @@
             
             updateDonutChart(donutLabels, donutData, donutColors);
 
-            // --- 3. เตรียมข้อมูลตาราง ---
+            // --- 3. เตรียมข้อมูลตาราง (เลือก Tier ที่สูงที่สุดเพียง 1 เดียว) ---
             const yearStats = {};
             filteredData.forEach(d => {
                 const y = d.year_be || 'N/A';
@@ -654,22 +673,25 @@
                 }
                 const stat = yearStats[y];
                 const level = (d.level || '').toUpperCase();
-                let tier = (d.tier || '').toUpperCase().trim();
-                const type = (d.type || '').toUpperCase();
+                
+                let tierStr = (d.tier || '').toUpperCase();
+                let typeStr = (d.type || '').toUpperCase();
+                let tags = tierStr.split(',').map(t => t.trim());
+                if (typeStr.includes('PROCEEDING') && !tags.includes('PROCEEDING')) tags.push('PROCEEDING');
 
                 if (level === 'NATIONAL') {
-                    if (tier === 'TCI1') stat.nat_tci1++;
-                    else if (tier === 'TCI2') stat.nat_tci2++;
-                    else if (tier === 'TCI3') stat.nat_tci3++;
-                    else if (tier === 'TCI') stat.nat_tci++;
-                    else if (type.includes('PROCEEDING') || tier.includes('PROCEEDING')) stat.nat_proc++;
+                    if (tags.some(t => t.includes('TCI1'))) stat.nat_tci1++;
+                    else if (tags.some(t => t.includes('TCI2'))) stat.nat_tci2++;
+                    else if (tags.some(t => t.includes('TCI3'))) stat.nat_tci3++;
+                    else if (tags.some(t => t === 'TCI')) stat.nat_tci++;
+                    else if (tags.some(t => t.includes('PROCEEDING'))) stat.nat_proc++;
                 } else if (level === 'INTERNATIONAL') {
-                    if (tier === 'Q1') stat.int_q1++;
-                    else if (tier === 'Q2') stat.int_q2++;
-                    else if (tier === 'Q3') stat.int_q3++;
-                    else if (tier === 'Q4') stat.int_q4++;
-                    else if (tier.includes('PUBMED') || tier.includes('PMC')) stat.int_pubmed++;
-                    else if (type.includes('PROCEEDING') || tier.includes('PROCEEDING')) stat.int_proc++;
+                    if (tags.some(t => t.includes('Q1'))) stat.int_q1++;
+                    else if (tags.some(t => t.includes('Q2'))) stat.int_q2++;
+                    else if (tags.some(t => t.includes('Q3'))) stat.int_q3++;
+                    else if (tags.some(t => t.includes('Q4'))) stat.int_q4++;
+                    else if (tags.some(t => t.includes('PUBMED') || t.includes('PMC'))) stat.int_pubmed++;
+                    else if (tags.some(t => t.includes('PROCEEDING'))) stat.int_proc++;
                 }
             });
 
@@ -955,11 +977,27 @@
                     linkHtml = `<a href="${url}" target="_blank" class="text-blue-500 hover:text-blue-700 underline text-xs break-all flex items-center gap-1 mt-2 w-fit"><i data-lucide="external-link" class="w-3 h-3"></i> DOI / Link</a>`;
                 }
                 
-                let tierBadgeClass = 'bg-slate-100 text-slate-700';
-                let currentTier = row.tier ? row.tier.toUpperCase() : '';
-                if (currentTier.includes('Q')) tierBadgeClass = 'bg-orange-100 text-orange-700';
-                else if (currentTier.includes('TCI')) tierBadgeClass = 'bg-emerald-100 text-emerald-700';
-                else if (currentTier.includes('PROCEEDING')) tierBadgeClass = 'bg-indigo-100 text-indigo-700';
+                // --- 📌 สร้างป้าย (Badges) แบบหลายอัน หากเปเปอร์อยู่หลายฐานข้อมูล ---
+                let tierHtml = '<div class="flex flex-wrap gap-1">';
+                let rawTiers = (row.tier || '').split(',').map(t => t.trim().toUpperCase()).filter(t => t !== '' && t !== 'NA');
+                let typeStr = (row.type || '').toUpperCase();
+                
+                // ถ้าระบุ type เป็น Proceeding แต่ไม่ได้เขียนลงในคอลัมน์ tier ให้เพิ่มเข้าไปโชว์ด้วย
+                if (typeStr.includes('PROCEEDING') && !rawTiers.includes('PROCEEDING')) {
+                    rawTiers.push('PROCEEDING');
+                }
+                if (rawTiers.length === 0) rawTiers.push('-');
+
+                rawTiers.forEach(t => {
+                    let badgeClass = 'bg-slate-100 text-slate-700';
+                    if (t.includes('Q')) badgeClass = 'bg-orange-100 text-orange-700';
+                    else if (t.includes('TCI')) badgeClass = 'bg-emerald-100 text-emerald-700';
+                    else if (t.includes('PROCEEDING')) badgeClass = 'bg-indigo-100 text-indigo-700';
+                    else if (t.includes('PUBMED') || t.includes('PMC')) badgeClass = 'bg-pink-100 text-pink-700';
+
+                    tierHtml += `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold ${badgeClass} shadow-sm border border-white/50">${t}</span>`;
+                });
+                tierHtml += '</div>';
 
                 tr.innerHTML = `
                     <td class="p-4 text-center text-slate-700 font-bold align-top bg-slate-50/30">${row.year_be}</td>
@@ -969,10 +1007,8 @@
                             ${row.pub_name || '-'}
                         </span>
                     </td>
-                    <td class="p-4 text-center align-top">
-                        <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold ${tierBadgeClass}">
-                            ${row.tier || '-'}
-                        </span>
+                    <td class="p-4 align-top w-32">
+                        ${tierHtml}
                     </td>
                     <td class="p-4 align-top leading-relaxed text-sm text-slate-600">
                         <div class="line-clamp-4" title="${row.citation || ''}">${row.citation || '-'}</div>
@@ -1067,8 +1103,8 @@
             });
 
             // 📌 แก้ไขตรงนี้: กำหนด Limit ให้สัมพันธ์กับตัวกรอง
-            // ถ้าดูทุกคน ให้โชว์ Top 200 เพื่อให้เห็นอาจารย์ครบถ้วนขึ้น, ถ้าดูรายบุคคลให้โชว์ Top 80
-            let displayLimit = selectedAuthor === 'All' ? 200 : 80; 
+            // ถ้าดูทุกคน ให้โชว์ Top 150 เพื่อให้เห็นอาจารย์ครบถ้วนขึ้น, ถ้าดูรายบุคคลให้โชว์ Top 40
+            let displayLimit = selectedAuthor === 'All' ? 150 : 40; 
 
             let topAuthors = Object.entries(nodeFreq)
                 .sort((a, b) => b[1] - a[1])
