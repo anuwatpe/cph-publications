@@ -584,8 +584,26 @@
                 select.appendChild(opt);
             });
 
+            // 📌 [เพิ่มใหม่ 1] อ่านค่าจากลิงก์ URL ถ้ามี ?author=ชื่อ ให้เลือกชื่อนั้นทันที
+            const urlParams = new URLSearchParams(window.location.search);
+            const authorFromUrl = urlParams.get('author');
+            if (authorFromUrl && authors.includes(authorFromUrl)) {
+                select.value = authorFromUrl;
+                selectedAuthor = authorFromUrl;
+            }
+
             select.addEventListener('change', (e) => {
                 selectedAuthor = e.target.value;
+                
+                // 📌 [เพิ่มใหม่ 2] เปลี่ยนลิงก์ URL อัตโนมัติ เพื่อให้ก๊อปปี้ไปส่งต่อได้ง่ายๆ
+                const newUrl = new URL(window.location);
+                if (selectedAuthor === 'All') {
+                    newUrl.searchParams.delete('author');
+                } else {
+                    newUrl.searchParams.set('author', selectedAuthor);
+                }
+                window.history.pushState({}, '', newUrl);
+
                 updateDashboard();
             });
         }
