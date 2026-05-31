@@ -166,6 +166,36 @@
             </div>
         </div>
 
+        <!-- 📌 แถบแชร์ Social Network (แชร์ภาพรวมหรือรายบุคคล) -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <i data-lucide="share-2" class="w-5 h-5 text-indigo-500"></i>
+                <span class="text-sm font-bold text-slate-700" id="share-label">แชร์ข้อมูลแดชบอร์ดภาพรวม:</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Facebook -->
+                <button onclick="shareToSocial('facebook')" class="bg-[#1877F2] hover:bg-[#166FE5] text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    <span>Facebook</span>
+                </button>
+                <!-- X (Twitter) -->
+                <button onclick="shareToSocial('twitter')" class="bg-black hover:bg-slate-900 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <span>X (Twitter)</span>
+                </button>
+                <!-- Line -->
+                <button onclick="shareToSocial('line')" class="bg-[#06C755] hover:bg-[#05B04B] text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 5.58 2 10.02c0 2.22 1.09 4.24 2.87 5.7-.12.44-.45 1.79-.52 2.08-.09.38-.4 1.5-.18 1.48.2-.02 1.42-.4 1.99-.76.54-.34 1.28-.85 1.79-1.18.99.31 2.05.48 3.05.48 5.52 0 10-3.58 10-8.02S17.52 2 12 2zm4.56 10.61h-1.63c-.13 0-.23-.1-.23-.23v-3.7c0-.13.1-.23.23-.23h1.63c.13 0 .23.1.23.23v.53c0 .13-.1.23-.23.23h-1.1v.61h1.1c.13 0 .23.1.23.23v.53c0 .13-.1.23-.23.23h-1.1v.69h1.1c.13 0 .23.1.23.23v.53c0 .12-.1.23-.23.23zm-3.13 0h-.53c-.13 0-.23-.1-.23-.23V9.22c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23v3.16c0 .13-.1.23-.23.23zm-1.5 0h-.53c-.13 0-.23-.1-.23-.23V10.2l-1.39-2.01c-.06-.08-.08-.16-.08-.24v-.27c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23l1.17 1.69V9.22c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23v3.16c0 .13-.1.23-.23.23zm-4.3 0H6c-.13 0-.23-.1-.23-.23V9.22c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23v2.61h.87c.13 0 .23.1.23.23v.53c0 .12-.1.23-.23.23z"/></svg>
+                    <span>Line</span>
+                </button>
+                <!-- Copy Link -->
+                <button onclick="copyCurrentLink()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm border border-slate-200">
+                    <i data-lucide="link" class="w-4 h-4"></i>
+                    <span id="copy-btn-text">คัดลอกลิงก์</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Stats Cards (Vibrant Gradients) -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div class="rounded-2xl p-5 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
@@ -584,7 +614,7 @@
                 select.appendChild(opt);
             });
 
-            // 📌 [เพิ่มใหม่ 1] อ่านค่าจากลิงก์ URL ถ้ามี ?author=ชื่อ ให้เลือกชื่อนั้นทันที
+            // 📌 อ่านค่าจากลิงก์ URL ถ้ามี ?author=ชื่อ ให้เลือกชื่อนั้นทันที
             const urlParams = new URLSearchParams(window.location.search);
             const authorFromUrl = urlParams.get('author');
             if (authorFromUrl && authors.includes(authorFromUrl)) {
@@ -595,7 +625,7 @@
             select.addEventListener('change', (e) => {
                 selectedAuthor = e.target.value;
                 
-                // 📌 [เพิ่มใหม่ 2] เปลี่ยนลิงก์ URL อัตโนมัติ เพื่อให้ก๊อปปี้ไปส่งต่อได้ง่ายๆ
+                // 📌 เปลี่ยนลิงก์ URL อัตโนมัติ เพื่อให้ก๊อปปี้ไปส่งต่อได้ง่ายๆ
                 const newUrl = new URL(window.location);
                 if (selectedAuthor === 'All') {
                     newUrl.searchParams.delete('author');
@@ -633,6 +663,14 @@
             const yearText = selectedYears.size === 0 ? 'ทุกปีการศึกษา' : `ปี: ${Array.from(selectedYears).sort().join(', ')}`;
             const authorText = selectedAuthor === 'All' ? 'ทุกคน' : `บุคลากร: ${selectedAuthor}`;
             document.getElementById('donut-subtitle').textContent = `${yearText} | ${authorText}`;
+
+            // อัปเดตข้อความแถบแชร์ตามบุคคลที่เลือก
+            const shareLabel = document.getElementById('share-label');
+            if (selectedAuthor === 'All') {
+                shareLabel.textContent = 'แชร์ข้อมูลแดชบอร์ดภาพรวม:';
+            } else {
+                shareLabel.textContent = `แชร์โปรไฟล์การตีพิมพ์ของ ${selectedAuthor}:`;
+            }
 
             // --- 1. เตรียมข้อมูลกราฟแท่ง ---
             const groupedTrend = filteredData.reduce((acc, curr) => {
@@ -1038,7 +1076,7 @@
                 let rawTiers = (row.tier || '').split(',').map(t => t.trim().toUpperCase()).filter(t => t !== '' && t !== 'NA');
                 let typeStr = (row.type || '').toUpperCase();
                 
-                // 📌 [แก้ไขแล้ว] ตรวจสอบว่ามีคำว่า PROCEEDING อยู่ในป้ายใดป้ายหนึ่งแล้วหรือยัง
+                // ตรวจสอบว่ามีคำว่า PROCEEDING อยู่ในป้ายใดป้ายหนึ่งแล้วหรือยัง
                 // ถ้ายังไม่มี และประเภทผลงานคือ Proceeding ค่อยเพิ่มป้ายเข้าไป
                 if (typeStr.includes('PROCEEDING') && !rawTiers.some(t => t.includes('PROCEEDING'))) {
                     rawTiers.push('PROCEEDING');
@@ -1053,7 +1091,7 @@
                     else if (t.includes('PROCEEDING')) badgeClass = 'bg-indigo-100 text-indigo-700';
                     else if (t.includes('PUBMED') || t.includes('PMC')) badgeClass = 'bg-pink-100 text-pink-700';
 
-                    // 📌 [เพิ่มใหม่] จัดหน้าตาข้อความให้อ่านง่ายและไม่ยาวเกินไป
+                    // จัดหน้าตาข้อความให้อ่านง่ายและไม่ยาวเกินไป
                     let displayText = t;
                     if (t === 'INTERNATIONAL PROCEEDING' || t === 'INT_PROCEEDING') displayText = 'Int. Proceeding';
                     else if (t === 'NATIONAL PROCEEDING' || t === 'NAT_PROCEEDING') displayText = 'Nat. Proceeding';
@@ -1170,7 +1208,7 @@
                 }
             });
 
-            // 📌 แก้ไขตรงนี้: กำหนด Limit ให้สัมพันธ์กับตัวกรอง
+            // กำหนด Limit ให้สัมพันธ์กับตัวกรอง
             // ถ้าดูทุกคน ให้โชว์ Top 150 เพื่อให้เห็นอาจารย์ครบถ้วนขึ้น, ถ้าดูรายบุคคลให้โชว์ Top 40
             let displayLimit = selectedAuthor === 'All' ? 150 : 40; 
 
@@ -1241,6 +1279,55 @@
                 coAuthorNetworkInstance.destroy();
             }
             coAuthorNetworkInstance = new vis.Network(container, data, options);
+        }
+
+        // --- 📌 ฟังก์ชันจัดการแชร์ลง Social Network ---
+        function shareToSocial(platform) {
+            const currentUrl = window.location.href;
+            const title = "ข้อมูลสรุปผลงานตีพิมพ์ทางวิชาการ (Publications Dashboard)";
+            
+            let shareUrl = "";
+            switch (platform) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`;
+                    break;
+                case 'line':
+                    shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+            }
+            
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+            }
+        }
+
+        // --- 📌 คัดลอกลิงก์ไปยัง Clipboard ---
+        function copyCurrentLink() {
+            const tempInput = document.createElement("input");
+            tempInput.value = window.location.href;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                // ใช้ document.execCommand เพื่อรองรับในระบบ iFrame ได้อย่างมีประสิทธิภาพสูงสุด
+                document.execCommand('copy');
+                
+                const copyBtnText = document.getElementById('copy-btn-text');
+                copyBtnText.textContent = 'คัดลอกแล้ว!';
+                copyBtnText.classList.add('text-emerald-600');
+                
+                setTimeout(() => {
+                    copyBtnText.textContent = 'คัดลอกลิงก์';
+                    copyBtnText.classList.remove('text-emerald-600');
+                }, 2000);
+            } catch (err) {
+                console.error("Copy failed", err);
+            } finally {
+                document.body.removeChild(tempInput);
+            }
         }
 
         // --- 📌 ฟังก์ชันจำลองสถิติการเข้าชม ---
