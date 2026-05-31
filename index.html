@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publication Dashboard</title>
+
+    <!-- 📌 1. แท็กสำหรับแสดงผลเวลาแชร์ใน Social Network (Open Graph / Facebook / Line) -->
+    <!-- แทนที่ "https://yourdomain.com" ด้วยลิงก์เว็บไซต์จริงของคุณ (เช่น ลิงก์ GitHub Pages) -->
+    <meta property="og:url" content="https://anuwatpe.github.io/cph-publications/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Publications Dashboard | สาขาวิชาสาธารณสุขชุมชน" />
+    <meta property="og:description" content="ระบบวิเคราะห์และสรุปสถิติผลงานตีพิมพ์ทางวิชาการและเครือข่ายความร่วมมือของบุคลากรแบบเรียลไทม์" />
+    
+    <!-- ลิงก์รูปภาพพรีวิวที่จะให้แสดงตอนแชร์ (แนะนำขนาด 1200x630px และต้องเป็นลิงก์แบบ Absolute URL เต็มรูปแบบ) -->
+    <!-- คุณสามารถอัปโหลดรูปพรีวิว (เช่นภาพ mockup แดชบอร์ดสวยๆ) ไว้บน GitHub แล้วนำลิงก์รูปมาใส่ตรงนี้ได้เลยครับ -->
+    <meta property="og:image" content="https://raw.githubusercontent.com/anuwatpe/cph-publications/main/cover-preview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- 📌 2. แท็กสำหรับแชร์บน X (Twitter) Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Publications Dashboard | สาขาวิชาสาธารณสุขชุมชน" />
+    <meta name="twitter:description" content="ระบบวิเคราะห์และสรุปสถิติผลงานตีพิมพ์ทางวิชาการและเครือข่ายความร่วมมือของบุคลากรแบบเรียลไทม์" />
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/anuwatpe/cph-publications/main/cover-preview.png" />
+
     <!-- Tailwind CSS สำหรับการจัดหน้า -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js สำหรับวาดกราฟ -->
@@ -666,7 +686,7 @@
                 shareLabel.textContent = `แชร์โปรไฟล์การตีพิมพ์ของ ${selectedAuthor}:`;
             }
 
-            // --- 1. เตรียมข้อมูลกราฟแท่ง ---
+            // --- 1. เตรียมข้อมูลกิราฟแท่ง ---
             const groupedTrend = filteredData.reduce((acc, curr) => {
                 const y = curr.year_be;
                 if (!y) return acc;
