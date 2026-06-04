@@ -5,48 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publication Dashboard</title>
 
-    <!-- 📌 1. แท็กสำหรับแสดงผลเวลาแชร์ใน Social Network (Open Graph / Facebook / Line) -->
-    <!-- แทนที่ "https://yourdomain.com" ด้วยลิงก์เว็บไซต์จริงของคุณ (เช่น ลิงก์ GitHub Pages) -->
+    <!-- แท็ก Open Graph สำหรับแสดงภาพพรีวิวการ์ดเวลาแชร์ลง Social Network -->
     <meta property="og:url" content="https://anuwatpe.github.io/cph-publications/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Publications Dashboard | สาขาวิชาสาธารณสุขชุมชน" />
     <meta property="og:description" content="ระบบวิเคราะห์และสรุปสถิติผลงานตีพิมพ์ทางวิชาการและเครือข่ายความร่วมมือของบุคลากรแบบเรียลไทม์" />
-    
-    <!-- ลิงก์รูปภาพพรีวิวที่จะให้แสดงตอนแชร์ (แนะนำขนาด 1200x630px และต้องเป็นลิงก์แบบ Absolute URL เต็มรูปแบบ) -->
-    <!-- คุณสามารถอัปโหลดรูปพรีวิว (เช่นภาพ mockup แดชบอร์ดสวยๆ) ไว้บน GitHub แล้วนำลิงก์รูปมาใส่ตรงนี้ได้เลยครับ -->
     <meta property="og:image" content="https://raw.githubusercontent.com/anuwatpe/cph-publications/main/cover-preview.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
 
-    <!-- 📌 2. แท็กสำหรับแชร์บน X (Twitter) Card -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Publications Dashboard | สาขาวิชาสาธารณสุขชุมชน" />
     <meta name="twitter:description" content="ระบบวิเคราะห์และสรุปสถิติผลงานตีพิมพ์ทางวิชาการและเครือข่ายความร่วมมือของบุคลากรแบบเรียลไทม์" />
     <meta name="twitter:image" content="https://raw.githubusercontent.com/anuwatpe/cph-publications/main/cover-preview.png" />
 
-    <!-- Tailwind CSS สำหรับการจัดหน้า -->
+    <!-- นำเข้าไลบรารี CSS และ JS ต่างๆ -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js สำหรับวาดกราฟ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- WordCloud2.js สำหรับสร้าง Word Cloud -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- 📌 ไลบรารีสำหรับ Export Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Vis Network สำหรับสร้าง Network Analysis -->
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
         
-        /* สไตล์สำหรับตอนกำลังโหลดข้อมูล */
         #loader {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(248, 250, 252, 0.9);
+            background: rgba(248, 250, 252, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -68,12 +57,10 @@
         }
         .hidden { display: none !important; }
         
-        /* ซ่อน Scrollbar ของตารางแต่ยังไถเลื่อนได้ */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* เพิ่ม Smooth Scroll และระยะเว้นด้านบนสำหรับ Sticky Menu */
-        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        html { scroll-behavior: smooth; scroll-padding-top: 90px; }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 p-6">
@@ -81,26 +68,28 @@
     <!-- หน้าจอโหลดดิ้ง -->
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <p class="text-slate-600 font-semibold text-lg drop-shadow-sm">กำลังโหลดและประมวลผลข้อมูล...</p>
+        <p class="text-slate-600 font-semibold text-lg">กำลังโหลดและประมวลผลข้อมูล...</p>
     </div>
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- 📌 แท็บเมนูนำทาง (Navigator Menu) -->
-        <nav class="sticky top-0 z-40 bg-slate-50/90 backdrop-blur-md py-3 border-b border-slate-200 flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6 sm:mx-0 sm:px-0">
-            <a href="#dashboard-overview" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
-                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม
-            </a>
-            <a href="#summary-table" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
-                <i data-lucide="table" class="w-4 h-4"></i> สรุปสถิติ
-            </a>
-            <a href="#author-publications-section" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
-                <i data-lucide="book-marked" class="w-4 h-4"></i> รายการผลงาน
-            </a>
-            <a href="#network-analysis" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
-                <i data-lucide="network" class="w-4 h-4"></i> เครือข่าย & คำสำคัญ
-            </a>
-        </nav>
+        <!-- 📌 แท็บเมนูนำทาง (Navigator Menu) ปรับให้ดูเนียนตา ไม่โดดเกินไป -->
+        <div class="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md pt-4 pb-0 border-b border-slate-200 -mx-6 px-6 sm:mx-0 sm:px-0 mb-6 transition-all">
+            <nav class="flex gap-6 overflow-x-auto hide-scrollbar text-sm font-semibold">
+                <a href="#dashboard-overview" class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-600 transition-all whitespace-nowrap">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม
+                </a>
+                <a href="#summary-table" class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-600 transition-all whitespace-nowrap">
+                    <i data-lucide="table" class="w-4 h-4"></i> สรุปสถิติ
+                </a>
+                <a href="#network-analysis" class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-600 transition-all whitespace-nowrap">
+                    <i data-lucide="network" class="w-4 h-4"></i> เครือข่าย & คำสำคัญ
+                </a>
+                <a href="#author-publications-section" class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-600 transition-all whitespace-nowrap">
+                    <i data-lucide="book-marked" class="w-4 h-4"></i> รายการผลงาน
+                </a>
+            </nav>
+        </div>
 
         <!-- Header & Filters -->
         <div class="flex flex-col gap-4">
@@ -115,28 +104,24 @@
                     <p class="text-sm text-slate-500 font-medium mt-1" id="status-text">กำลังเชื่อมต่อข้อมูล...</p>
                 </div>
 
-                <!-- 📌 แถบแชร์ ย้ายมาอยู่มุมบนขวา (แบบกะทัดรัด) -->
+                <!-- แถบแชร์ มุมบนขวา (แบบกะทัดรัด) -->
                 <div class="flex flex-col items-start md:items-end gap-2 mt-2 md:mt-0 w-full md:w-auto">
                     <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5" id="share-label">
                         <i data-lucide="share-2" class="w-3.5 h-3.5"></i> แชร์แดชบอร์ดภาพรวม:
                     </span>
                     <div class="flex flex-wrap items-center gap-1.5">
-                        <!-- Facebook -->
                         <button onclick="shareToSocial('facebook')" class="bg-[#1877F2] hover:bg-[#166FE5] text-white p-2 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-colors shadow-sm" title="แชร์ลง Facebook">
                             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                             <span class="hidden sm:inline">Facebook</span>
                         </button>
-                        <!-- X (Twitter) -->
                         <button onclick="shareToSocial('twitter')" class="bg-black hover:bg-slate-900 text-white p-2 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-colors shadow-sm" title="แชร์ลง X (Twitter)">
                             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                             <span class="hidden sm:inline">X (Twitter)</span>
                         </button>
-                        <!-- Line -->
                         <button onclick="shareToSocial('line')" class="bg-[#06C755] hover:bg-[#05B04B] text-white p-2 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-colors shadow-sm" title="แชร์ลง Line">
                             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 5.58 2 10.02c0 2.22 1.09 4.24 2.87 5.7-.12.44-.45 1.79-.52 2.08-.09.38-.4 1.5-.18 1.48.2-.02 1.42-.4 1.99-.76.54-.34 1.28-.85 1.79-1.18.99.31 2.05.48 3.05.48 5.52 0 10-3.58 10-8.02S17.52 2 12 2zm4.56 10.61h-1.63c-.13 0-.23-.1-.23-.23v-3.7c0-.13.1-.23.23-.23h1.63c.13 0 .23.1.23.23v.53c0 .13-.1.23-.23.23h-1.1v.61h1.1c.13 0 .23.1.23.23v.53c0 .13-.1.23-.23.23h-1.1v.69h1.1c.13 0 .23.1.23.23v.53c0 .12-.1.23-.23.23zm-3.13 0h-.53c-.13 0-.23-.1-.23-.23V9.22c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23v3.16c0 .13-.1.23-.23.23zm-1.5 0h-.53c-.13 0-.23-.1-.23-.23V10.2l-1.39-2.01c-.06-.08-.08-.16-.08-.24v-.27c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23l1.17 1.69V9.22c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23v3.16c0 .13-.1.23-.23.23zm-4.3 0H6c-.13 0-.23-.1-.23-.23V9.22c0-.13.1-.23.23-.23h.53c.13 0 .23.1.23.23v2.61h.87c.13 0 .23.1.23.23v.53c0 .12-.1.23-.23.23z"/></svg>
                             <span class="hidden sm:inline">Line</span>
                         </button>
-                        <!-- Copy Link -->
                         <button onclick="copyCurrentLink()" class="bg-white hover:bg-slate-100 text-slate-700 p-2 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-colors shadow-sm border border-slate-200" title="คัดลอกลิงก์">
                             <i data-lucide="link" class="w-3.5 h-3.5"></i>
                             <span id="copy-btn-text" class="hidden sm:inline">คัดลอกลิงก์</span>
@@ -145,77 +130,54 @@
                 </div>
             </div>
 
-            <!-- Filter Section -->
             <div class="flex flex-col lg:flex-row gap-4">
-                <!-- Multi-select Year Filters (Pill Buttons) -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex-1 flex flex-col gap-3">
                     <span class="text-sm font-bold text-slate-700">เลือกปีการศึกษา (คลิกเพื่อเลือกหลายปี):</span>
-                    <div class="flex items-center gap-2 flex-wrap" id="year-filter-container">
-                        <!-- ปุ่มเลือกปีจะถูกใส่เข้ามาด้วย Javascript -->
-                    </div>
+                    <div class="flex items-center gap-2 flex-wrap" id="year-filter-container"></div>
                 </div>
 
-                <!-- Author Filter (Dropdown) -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 lg:w-1/3 flex flex-col gap-3">
                     <span class="text-sm font-bold text-slate-700">เลือกบุคลากร (รายบุคคล):</span>
                     <select id="authorSelect" class="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium cursor-pointer transition-colors hover:bg-slate-100">
                         <option value="All">บุคลากรทุกคน</option>
-                        <!-- ชื่อบุคลากรจะถูกใส่เข้ามาด้วย Javascript -->
                     </select>
                 </div>
             </div>
         </div>
 
+        <!-- กล่องข้อความแจ้งเตือน Error -->
         <div id="error-message" class="hidden bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-200 shadow-sm flex flex-col gap-2">
             <div><strong>⚠️ เกิดข้อผิดพลาด:</strong> <span id="error-text"></span></div>
-            <div class="text-red-600 text-xs mt-1">
-                <strong>วิธีแก้ไขเบื้องต้น:</strong><br>
-                1. ตรวจสอบให้แน่ใจว่าไปที่เมนู <b>ไฟล์ (File) > แชร์ (Share) > เผยแพร่ทางเว็บ (Publish to web)</b> ใน Google Sheet แล้ว<br>
-                2. เลือกรูปแบบไฟล์ที่เผยแพร่เป็น <b>"ค่าที่คั่นด้วยจุลภาค (.csv)"</b><br>
-                3. นำลิงก์ที่ได้มาใส่ในตัวแปร <code>GOOGLE_SHEET_CSV_URL</code> อีกครั้ง
-            </div>
         </div>
 
-        <!-- Author Profile Summary -->
+        <!-- Author Profile Card -->
         <div id="author-profile-section" class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl text-white mt-6 hidden transition-all relative overflow-hidden">
-            <!-- Background Decoration -->
             <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
-
             <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
                 <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 w-full md:w-auto text-center sm:text-left">
-                    <!-- รูปโปรไฟล์ -->
                     <div id="profile-image-container" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl font-bold shadow-inner flex-shrink-0 border border-white/10 overflow-hidden relative">
                         <i data-lucide="user" class="w-12 h-12 text-white/80"></i>
                     </div>
                     <div class="flex flex-col justify-center py-1">
                         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight" id="profile-name">ชื่อบุคลากร</h2>
-                        
-                        <!-- อีเมล -->
                         <div id="profile-email-container" class="text-slate-300 text-sm mt-2 flex items-center justify-center sm:justify-start gap-2 hidden">
                             <i data-lucide="mail" class="w-4 h-4 opacity-70"></i>
                             <span id="profile-email" class="font-medium tracking-wide">email@example.com</span>
                         </div>
-                        
-                        <!-- ลิงก์โปรไฟล์ -->
-                        <div id="profile-link-container" class="mt-4 flex gap-2 flex-wrap justify-center sm:justify-start">
-                            <!-- ลิงก์โปรไฟล์จะถูกแสดงตรงนี้ -->
-                        </div>
+                        <div id="profile-link-container" class="mt-4 flex gap-2 flex-wrap justify-center sm:justify-start"></div>
                     </div>
                 </div>
-                
                 <div class="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
                     <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
                         <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">h-index</p>
-                        <p class="text-4xl font-extrabold text-emerald-400 drop-shadow-sm" id="profile-hindex">-</p>
+                        <p class="text-4xl font-extrabold text-emerald-400" id="profile-hindex">-</p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center flex-1 md:w-36 border border-white/10 shadow-sm">
                         <p class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-1">Citations</p>
-                        <p class="text-4xl font-extrabold text-sky-400 drop-shadow-sm" id="profile-citations">-</p>
+                        <p class="text-4xl font-extrabold text-sky-400" id="profile-citations">-</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Research Interest -->
             <div id="profile-interest-container" class="relative z-10 mt-6 pt-5 border-t border-white/10 hidden">
                 <div class="flex items-start gap-3">
                     <div class="mt-0.5 bg-indigo-500/20 p-2 rounded-xl border border-indigo-400/20 text-indigo-300">
@@ -231,7 +193,7 @@
 
         <!-- Stats Cards (Vibrant Gradients) -->
         <div id="dashboard-overview" class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div class="rounded-2xl p-5 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+            <div class="rounded-2xl p-5 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center gap-4 transition-all hover:scale-[1.02] duration-300">
                 <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
                     <i data-lucide="file-text" class="w-7 h-7"></i>
                 </div>
@@ -241,7 +203,7 @@
                 </div>
             </div>
             
-            <div class="rounded-2xl p-5 shadow-lg shadow-indigo-500/20 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+            <div class="rounded-2xl p-5 shadow-lg shadow-indigo-500/20 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center gap-4 transition-all hover:scale-[1.02] duration-300">
                 <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
                     <i data-lucide="globe" class="w-7 h-7"></i>
                 </div>
@@ -251,7 +213,7 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl p-5 shadow-lg shadow-emerald-500/20 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+            <div class="rounded-2xl p-5 shadow-lg shadow-emerald-500/20 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center gap-4 transition-all hover:scale-[1.02] duration-300">
                 <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
                     <i data-lucide="book-open" class="w-7 h-7"></i>
                 </div>
@@ -261,7 +223,7 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl p-5 shadow-lg shadow-orange-500/20 bg-gradient-to-br from-orange-400 to-pink-500 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+            <div class="rounded-2xl p-5 shadow-lg shadow-orange-500/20 bg-gradient-to-br from-orange-400 to-pink-500 text-white flex items-center gap-4 transition-all hover:scale-[1.02] duration-300">
                 <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
                     <i data-lucide="award" class="w-7 h-7"></i>
                 </div>
@@ -274,7 +236,6 @@
 
         <!-- Charts Row -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Trend Chart -->
             <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
                 <h2 class="text-lg font-bold mb-6 text-slate-800">แนวโน้มการตีพิมพ์แยกตามปีการศึกษา</h2>
                 <div class="relative h-72 w-full">
@@ -282,7 +243,6 @@
                 </div>
             </div>
 
-            <!-- Donut Chart -->
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col">
                 <h2 class="text-lg font-bold mb-2 text-slate-800">สัดส่วนการตีพิมพ์แยกตามฐานข้อมูล (Tier)</h2>
                 <p id="donut-subtitle" class="text-sm text-indigo-500 font-medium mb-4">ทุกปีการศึกษา</p>
@@ -332,48 +292,14 @@
                             <th class="p-2 font-medium text-slate-500 text-center border-r border-slate-200">PubMed/PMC</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
-                        <!-- ข้อมูลจะถูกใส่ด้วย JS -->
-                    </tbody>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
-            <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden rounded-r-3xl"></div>
-
-            <!-- 📌 เพิ่มกล่องคำอธิบายเกณฑ์การนับผลงาน (Footnote) ตรงนี้ -->
             <div class="mt-4 flex items-start gap-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100/60">
                 <i data-lucide="info" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"></i>
                 <p class="text-xs text-slate-600 leading-relaxed">
-                    <strong class="text-blue-700">เกณฑ์การนับจำนวน:</strong> กรณีที่ผลงาน 1 เรื่อง ถูกตีพิมพ์หรือปรากฏอยู่ในหลายฐานข้อมูล (เช่น เป็นทั้ง <em>Proceeding</em> และ <em>Scopus Q3</em>) 
-                    ระบบจะทำการนับยอดในตารางสรุปนี้เพียง <strong>1 ครั้ง</strong> ต่อ 1 ผลงาน เพื่อป้องกันการนับยอดรวมซ้ำซ้อน 
-                    <br><span class="text-slate-500">*ท่านสามารถดูฐานข้อมูลทั้งหมดของแต่ละผลงานได้ที่ตารางรายบุคคลด้านล่าง</span>
+                    <strong class="text-blue-700">เกณฑ์การนับจำนวน:</strong> กรณีที่ผลงาน 1 เรื่อง ถูกตีพิมพ์หรือปรากฏอยู่ในหลายฐานข้อมูล ระบบจะทำการนับยอดในตารางสรุปนี้เพียง <strong>1 ครั้ง</strong> ต่อ 1 ผลงาน เพื่อป้องกันการนับยอดรวมซ้ำซ้อน
                 </p>
-            </div>
-
-        </div>
-
-        <!-- Individual Publications Table -->
-        <div id="author-publications-section" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden transition-all">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
-                <div>
-                    <h2 id="author-publications-title" class="text-lg font-bold text-slate-800">รายการผลงานตีพิมพ์รายบุคคล</h2>
-                    <p id="author-publications-subtitle" class="text-sm text-slate-500 mt-1">แสดงผลงานทั้งหมดของบุคลากรที่เลือก</p>
-                </div>
-                <!-- 📌 ปุ่ม Export Excel -->
-                <button onclick="exportTableExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap" title="ส่งออกเป็นไฟล์ Excel">
-                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
-                </button>
-            </div>
-            <div class="overflow-x-auto pb-4 hide-scrollbar">
-                <table class="w-full text-left text-sm border-collapse min-w-[800px]" id="author-publications-table">
-                    <thead>
-                        <tr id="author-publications-head" class="border-b-2 border-slate-200 bg-slate-50">
-                            <!-- หัวตารางจะถูกแทรกด้วย JS อัตโนมัติ -->
-                        </tr>
-                    </thead>
-                    <tbody id="author-publications-body">
-                        <!-- ข้อมูลจะถูกใส่ด้วย JS -->
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -382,42 +308,63 @@
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
-                    <p id="wordcloud-subtitle" class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัย (คำนวณจากภาพรวมทุกปีและทุกคน)</p>
+                    <p id="wordcloud-subtitle" class="text-sm text-slate-500 mt-1">คำสำคัญที่ถูกใช้ในงานวิจัย</p>
                 </div>
             </div>
-            
             <div id="wordcloud-container" class="w-full flex justify-center items-center h-[450px] relative bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-50">
                 <canvas id="wordCloudCanvas"></canvas>
             </div>
         </div>
 
         <!-- Co-authorship Network Analysis Section -->
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-12">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-6">
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">เครือข่ายผู้แต่งร่วม (Co-authorship Network Analysis)</h2>
                     <p id="network-subtitle" class="text-sm text-slate-500 mt-1">วิเคราะห์ความร่วมมือระหว่างบุคคล จากข้อมูลการอ้างอิง (Citation)</p>
                 </div>
             </div>
-            
-            <div id="coauthor-network-container" class="w-full flex justify-center items-center h-[500px] relative bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-inner">
-                <!-- กราฟเครือข่ายจะถูกวาดที่นี่ -->
-            </div>
+            <div id="coauthor-network-container" class="w-full flex justify-center items-center h-[500px] relative bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-inner"></div>
             <p class="text-xs text-slate-400 mt-3 text-center">* สามารถใช้เมาส์ซูมเข้า-ออก หรือลากจุด (Node) เพื่อดูความสัมพันธ์ที่ชัดเจนขึ้นได้</p>
+        </div>
+
+        <!-- Individual Publications Table (ย้ายมาไว้ข้างล่างสุด และเพิ่มระบบแบ่งหน้า) -->
+        <div id="author-publications-section" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-12 overflow-hidden transition-all">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
+                <div>
+                    <h2 id="author-publications-title" class="text-lg font-bold text-slate-800">รายการผลงานตีพิมพ์รายบุคคล</h2>
+                    <p id="author-publications-subtitle" class="text-sm text-slate-500 mt-1">แสดงผลงานทั้งหมดของบุคลากรที่เลือก</p>
+                </div>
+                <!-- ปุ่ม Export Excel -->
+                <button onclick="exportTableExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap" title="ส่งออกเป็นไฟล์ Excel">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto pb-4 hide-scrollbar">
+                <table class="w-full text-left text-sm border-collapse min-w-[800px]" id="author-publications-table">
+                    <thead>
+                        <tr id="author-publications-head" class="border-b-2 border-slate-200 bg-slate-50">
+                            <!-- จะใส่ด้วย JS -->
+                        </tr>
+                    </thead>
+                    <tbody id="author-publications-body"></tbody>
+                </table>
+            </div>
+
+            <!-- ส่วนควบคุมระบบแบ่งหน้า (Pagination Controls) -->
+            <div id="pagination-controls" class="mt-4 border-t border-slate-100 pt-6"></div>
         </div>
 
     </div>
 
     <!-- Copyright Footer & Visitor Counter -->
     <footer class="max-w-7xl mx-auto pb-8 pt-6 text-center border-t border-slate-200 mt-4 flex flex-col items-center">
-        
-        <!-- 📌 สถิติการเข้าชมเว็บไซต์ (Visitor Counter UI) -->
         <div class="w-full max-w-3xl mx-auto mb-8 px-4">
             <h3 class="text-sm font-bold text-slate-600 mb-4 uppercase tracking-widest flex items-center justify-center gap-2">
                 <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-500"></i> สถิติการเข้าชมเว็บไซต์
             </h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                <!-- ออนไลน์ -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">กำลังออนไลน์</span>
                     <div class="flex items-center gap-2">
@@ -428,17 +375,14 @@
                         <span id="count-online" class="text-2xl font-black text-slate-700">1</span>
                     </div>
                 </div>
-                <!-- วันนี้ -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">วันนี้</span>
                     <span id="count-today" class="text-2xl font-black text-indigo-600">0</span>
                 </div>
-                <!-- ปีนี้ -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ปีนี้</span>
                     <span id="count-year" class="text-2xl font-black text-blue-600">0</span>
                 </div>
-                <!-- ทั้งหมด -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:shadow-md transition-all">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ทั้งหมด</span>
                     <span id="count-total" class="text-2xl font-black text-slate-800">0</span>
@@ -459,12 +403,10 @@
         // Initialize Icons
         lucide.createIcons();
 
-        // 📌 ใส่ URL CSV จาก Google Sheet ตรงนี้
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmnusNVBtnfg7R5nAs78bf4emExXYqUfokp7vr9TwL71e29j1dO4l-iJocLba4IEE1R4MoS0vh6eEE/pub?output=csv";
 
         const LEVEL_COLORS = { 'National': '#10b981', 'International': '#6366f1' };
         
-        // เพิ่มสีให้กับ Int. Proceeding และ Nat. Proceeding
         const TIER_COLORS = {
             'Q1': '#f97316', 'Q2': '#f59e0b', 'Q3': '#fbbf24', 'Q4': '#fcd34d', 
             'TCI1': '#10b981', 'TCI2': '#34d399', 'TCI3': '#6ee7b7', 'TCI': '#a7f3d0',
@@ -485,6 +427,12 @@
         let trendChartInstance = null;
         let donutChartInstance = null;
         let coAuthorNetworkInstance = null;
+
+        // 📌 ตัวแปรควบคุมระบบแบ่งหน้า (Pagination)
+        let currentPubPage = 1;
+        const itemsPerPage = 10;
+        let showAllPubs = false; // true = แสดงทั้งหมดทีเดียว / false = แบ่งหน้าละ 10
+        let currentPubData = []; // เก็บข้อมูลผลงานที่ผ่านการกรองแล้ว (พร้อมใช้งานกับการเปลี่ยนหน้า/ส่งออก)
 
         const fallbackMockData = [
             { author: "AP", year_be: 2563, title: "Risk factors for Opisthorchis viverrini infection: a systematic review", pub_name: "Journal of Infection and Public Health", type: "Journal", level: "International", tier: "Q1", keywords: ["risk factors", "opisthorchis viverrini"], citation: "Pengput, A., & Schwartz, D. G. (2020)...", urlDoi: "https://doi.org/10.1016/j.jiph.2020.05.028", profileLink: "https://scholar.google.com", hIndex: "12", totalCitations: "450", email: "ap@example.com", profileImage: "https://i.pravatar.cc/150?u=ap", researchInterest: "Epidemiology, Public Health, Infectious Diseases" },
@@ -533,7 +481,7 @@
                 const csvText = await response.text();
                 
                 if (csvText.trim().startsWith("<!DOCTYPE html>")) {
-                     throw new Error('Google Sheet ยังไม่ได้เปิด "เผยแพร่ทางเว็บ (Publish to web)" ระบบจึงบล็อกการเข้าถึง');
+                     throw new Error('Google Sheet ยังไม่ได้เปิด "เผยแพร่ทางเว็บ"');
                 }
 
                 const parsedData = parseCSV(csvText);
@@ -557,11 +505,9 @@
                         keywords: cleanedKeywords,
                         citation: d.citation || '',
                         urlDoi: d['url-doi'] || d.url_doi || d.url || '',
-                        
                         profileLink: d.profile || d.Profile || '',
                         hIndex: d['h-index'] || d.h_index || d.hIndex || d['h index'] || '',
                         totalCitations: d.total_citations || d.author_citations || d.citations_count || '',
-                        
                         email: d.email || d.Email || d['อีเมล'] || '',
                         profileImage: d.image || d.Image || d.profile_pic || d.pic || d['รูปโปรไฟล์'] || '',
                         researchInterest: d.research_interest || d['research interest'] || d.interest || d.Interest || d['ความสนใจ'] || ''
@@ -585,7 +531,7 @@
                 renderYearFilters();
                 renderAuthorFilter();
                 updateDashboard(); 
-                
+                setupNavScrollHighlight();
                 document.getElementById('loader').classList.add('hidden');
             }
         }
@@ -643,7 +589,6 @@
                 select.appendChild(opt);
             });
 
-            // 📌 อ่านค่าจากลิงก์ URL ถ้ามี ?author=ชื่อ ให้เลือกชื่อนั้นทันที
             const urlParams = new URLSearchParams(window.location.search);
             const authorFromUrl = urlParams.get('author');
             if (authorFromUrl && authors.includes(authorFromUrl)) {
@@ -653,8 +598,6 @@
 
             select.addEventListener('change', (e) => {
                 selectedAuthor = e.target.value;
-                
-                // 📌 เปลี่ยนลิงก์ URL อัตโนมัติ เพื่อให้ก๊อปปี้ไปส่งต่อได้ง่ายๆ
                 const newUrl = new URL(window.location);
                 if (selectedAuthor === 'All') {
                     newUrl.searchParams.delete('author');
@@ -662,8 +605,22 @@
                     newUrl.searchParams.set('author', selectedAuthor);
                 }
                 window.history.pushState({}, '', newUrl);
-
                 updateDashboard();
+            });
+        }
+
+        // Setup Underline Menu Active Highlighting when clicking or scrolling
+        function setupNavScrollHighlight() {
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    navLinks.forEach(l => {
+                        l.classList.remove('border-indigo-600', 'text-indigo-600');
+                        l.classList.add('border-transparent', 'text-slate-500');
+                    });
+                    this.classList.add('border-indigo-600', 'text-indigo-600');
+                    this.classList.remove('border-transparent', 'text-slate-500');
+                });
             });
         }
 
@@ -678,7 +635,6 @@
             const international = filteredData.filter(d => d.level === 'International').length;
             const national = filteredData.filter(d => d.level === 'National').length;
             
-            // นับ Q1, Q2 โดยครอบคลุมกรณีที่มีหลายฐานใน 1 เปเปอร์
             const q1q2 = filteredData.filter(d => {
                 const t = (d.tier || '').toUpperCase();
                 return t.includes('Q1') || t.includes('Q2');
@@ -693,7 +649,6 @@
             const authorText = selectedAuthor === 'All' ? 'ทุกคน' : `บุคลากร: ${selectedAuthor}`;
             document.getElementById('donut-subtitle').textContent = `${yearText} | ${authorText}`;
 
-            // อัปเดตข้อความแถบแชร์ตามบุคคลที่เลือก
             const shareLabel = document.getElementById('share-label');
             if (selectedAuthor === 'All') {
                 shareLabel.textContent = 'แชร์ข้อมูลแดชบอร์ดภาพรวม:';
@@ -701,7 +656,7 @@
                 shareLabel.textContent = `แชร์โปรไฟล์การตีพิมพ์ของ ${selectedAuthor}:`;
             }
 
-            // --- 1. เตรียมข้อมูลกิราฟแท่ง ---
+            // --- 1. กราฟแท่ง ---
             const groupedTrend = filteredData.reduce((acc, curr) => {
                 const y = curr.year_be;
                 if (!y) return acc;
@@ -714,14 +669,12 @@
             const trendDataSorted = Object.values(groupedTrend).sort((a, b) => a.year - b.year);
             updateTrendChart(trendDataSorted);
             
-            // --- 2. เตรียมข้อมูลกราฟโดนัท (เลือก Tier ที่สูงที่สุดเป็น Primary เพื่อไม่นับซ้ำ) ---
+            // --- 2. กราฟโดนัท ---
             const tierCounts = {};
             filteredData.forEach(d => {
                 let tierStr = (d.tier || '').toUpperCase();
                 let typeStr = (d.type || '').toUpperCase();
                 let tags = tierStr.split(',').map(t => t.trim());
-                
-                // ตรวจสอบระดับ (Level) ของผลงาน
                 const level = (d.level || '').toUpperCase();
 
                 if (typeStr.includes('PROCEEDING') && !tags.includes('PROCEEDING')) tags.push('PROCEEDING');
@@ -737,7 +690,6 @@
                 else if (tags.some(t => t.includes('TCI3'))) primaryTier = 'TCI3';
                 else if (tags.some(t => t === 'TCI')) primaryTier = 'TCI';
                 else if (tags.some(t => t.includes('PROCEEDING'))) {
-                    // แยกระดับ International และ National ของ Proceeding
                     primaryTier = level === 'INTERNATIONAL' ? 'INT_PROCEEDING' : 'NAT_PROCEEDING';
                 }
                 
@@ -759,7 +711,6 @@
             const donutColors = [];
 
             sortedTiers.forEach(t => {
-                // แปลงชื่อให้แสดงผลในกราฟโดนัทได้สวยงาม
                 let label = t;
                 if (t === 'INT_PROCEEDING') label = 'Int. Proceeding';
                 if (t === 'NAT_PROCEEDING') label = 'Nat. Proceeding';
@@ -768,10 +719,9 @@
                 donutData.push(tierCounts[t]);
                 donutColors.push(TIER_COLORS[t] || '#94a3b8');
             });
-            
             updateDonutChart(donutLabels, donutData, donutColors);
 
-            // --- 3. เตรียมข้อมูลตาราง (เลือก Tier ที่สูงที่สุดเพียง 1 เดียว) ---
+            // --- 3. ตารางสรุปรายปี ---
             const yearStats = {};
             filteredData.forEach(d => {
                 const y = d.year_be || 'N/A';
@@ -801,7 +751,6 @@
                 else if (tags.some(t => t.includes('TCI3'))) highestTier = 'TCI3';
                 else if (tags.some(t => t === 'TCI')) highestTier = 'TCI';
                 else if (tags.some(t => t.includes('PROCEEDING'))) {
-                    // ตัดสิน Proceeding ตาม Level
                     highestTier = level === 'INTERNATIONAL' ? 'INT_PROCEEDING' : 'NAT_PROCEEDING';
                 }
 
@@ -838,14 +787,15 @@
                 totals.int_proc += r.int_proc;
             });
             tableRows.push(totals);
-
             renderTable2568(tableRows);
 
-            // --- 4. แสดงผลงานรายบุคคล ---
-            renderAuthorPublicationsTable(filteredData);
+            // --- 4. ตารางผลงานรายบุคคล/ผลงานทั้งหมด พร้อมระบบแบ่งหน้า ---
+            currentPubData = [...filteredData].sort((a, b) => b.year_be - a.year_be); // บันทึกลงตัวแปร Global
+            currentPubPage = 1; // รีเซ็ตมาหน้าแรกทุกครั้งเมื่อมีการกรอง
+            renderAuthorPublicationsTable(); // วาดตารางใหม่
             renderAuthorProfileCard(filteredData);
 
-            // --- 5. อัปเดต Word Cloud & Co-authorship Network ---
+            // --- 5. อัปเดต Word Cloud & Network ---
             if (selectedAuthor !== lastWordCloudAuthor) {
                 const authorFilteredData = selectedAuthor === 'All' 
                     ? globalData 
@@ -873,7 +823,6 @@
 
         function updateTrendChart(data) {
             const ctx = document.getElementById('trendChart').getContext('2d');
-            
             const labels = data.map(d => d.year);
             const nationalData = data.map(d => d.National);
             const internationalData = data.map(d => d.International);
@@ -889,16 +838,14 @@
                             label: 'National',
                             data: nationalData,
                             backgroundColor: LEVEL_COLORS.National,
-                            borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 6, bottomRight: 6 },
-                            borderSkipped: false,
+                            borderRadius: 6,
                             barThickness: 32
                         },
                         {
                             label: 'International',
                             data: internationalData,
                             backgroundColor: LEVEL_COLORS.International,
-                            borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 6, bottomRight: 6 },
-                            borderSkipped: false,
+                            borderRadius: 6,
                             barThickness: 32
                         }
                     ]
@@ -920,7 +867,6 @@
 
         function updateDonutChart(labels, dataCounts, bgColors) {
             const ctx = document.getElementById('donutChart').getContext('2d');
-            
             if (donutChartInstance) donutChartInstance.destroy();
 
             donutChartInstance = new Chart(ctx, {
@@ -970,7 +916,7 @@
                 const tr = document.createElement('tr');
                 
                 tr.className = isTotalRow 
-                    ? "border-t-2 border-slate-300 bg-slate-100 font-bold text-slate-800 hover:bg-slate-200/50 transition-colors" 
+                    ? "border-t-2 border-slate-300 bg-slate-100 font-bold text-slate-800" 
                     : "border-b border-slate-100 last:border-none hover:bg-slate-50/70 transition-colors";
 
                 const natTotal = row.nat_tci + row.nat_tci3 + row.nat_tci2 + row.nat_tci1 + row.nat_proc;
@@ -981,22 +927,19 @@
 
                 tr.innerHTML = `
                     <td class="p-3 text-center border-x border-slate-100 ${isTotalRow ? 'font-extrabold text-slate-900' : 'text-slate-700 font-medium'}">${row.year}</td>
-                    
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-emerald-800' : 'text-emerald-600'}">${fmt(row.nat_tci)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-emerald-800' : 'text-emerald-600'}">${fmt(row.nat_tci3)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-emerald-800' : 'text-emerald-600'}">${fmt(row.nat_tci2)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-emerald-800' : 'text-emerald-600'}">${fmt(row.nat_tci1)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-emerald-800' : 'text-emerald-600'}">${fmt(row.nat_proc)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-emerald-600">${fmt(row.nat_tci)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-emerald-600">${fmt(row.nat_tci3)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-emerald-600">${fmt(row.nat_tci2)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-emerald-600">${fmt(row.nat_tci1)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-emerald-600">${fmt(row.nat_proc)}</td>
                     <td class="p-2 text-center border-r border-slate-200 font-bold text-emerald-700 ${isTotalRow ? 'bg-emerald-100/50' : 'bg-emerald-50/30'}">${fmt(natTotal)}</td>
-                    
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-indigo-800' : 'text-indigo-600'}">${fmt(row.int_q4)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-indigo-800' : 'text-indigo-600'}">${fmt(row.int_q3)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-indigo-800' : 'text-indigo-600'}">${fmt(row.int_q2)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-indigo-800' : 'text-indigo-600'}">${fmt(row.int_q1)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-indigo-800' : 'text-indigo-600'}">${fmt(row.int_pubmed)}</td>
-                    <td class="p-2 text-center border-r border-slate-100 ${isTotalRow ? 'text-indigo-800' : 'text-indigo-600'}">${fmt(row.int_proc)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-indigo-600">${fmt(row.int_q4)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-indigo-600">${fmt(row.int_q3)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-indigo-600">${fmt(row.int_q2)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-indigo-600">${fmt(row.int_q1)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-indigo-600">${fmt(row.int_pubmed)}</td>
+                    <td class="p-2 text-center border-r border-slate-100 text-indigo-600">${fmt(row.int_proc)}</td>
                     <td class="p-2 text-center border-r border-slate-200 font-bold text-indigo-700 ${isTotalRow ? 'bg-indigo-100/50' : 'bg-indigo-50/30'}">${fmt(intTotal)}</td>
-                    
                     <td class="p-3 text-center border-r border-slate-200 font-extrabold text-slate-900 ${isTotalRow ? 'bg-slate-200/50' : 'bg-slate-50'} shadow-[inset_1px_0_0_#e2e8f0]">${fmt(grandTotal)}</td>
                 `;
                 tbody.appendChild(tr);
@@ -1005,7 +948,6 @@
 
         function renderAuthorProfileCard(data) {
             const profileSection = document.getElementById('author-profile-section');
-            
             if (selectedAuthor === 'All' || data.length === 0) {
                 profileSection.classList.add('hidden');
                 return;
@@ -1062,11 +1004,11 @@
             } else {
                 interestContainer.classList.add('hidden');
             }
-            
             lucide.createIcons();
         }
 
-        function renderAuthorPublicationsTable(data) {
+        // 📌 ฟังก์ชันจัดการตารางแสดงรายการผลงาน และควบคุมแบ่งหน้า
+        function renderAuthorPublicationsTable() {
             const section = document.getElementById('author-publications-section');
             const tbody = document.getElementById('author-publications-body');
             const thead = document.getElementById('author-publications-head');
@@ -1075,43 +1017,50 @@
             
             if (!section || !tbody || !thead) return;
 
-            // ไม่ซ่อนตารางแล้วแม้จะเลือกทุกคน
+            // ตารางนี้จะไม่ถูกซ่อนแล้ว แม้ว่าจะเลือก "ทุกคน"
             section.classList.remove('hidden');
 
             if (selectedAuthor === 'All') {
                 title.textContent = 'รายการผลงานตีพิมพ์ทั้งหมด';
                 subtitle.textContent = 'แสดงผลงานทั้งหมดของบุคลากรทุกคน';
                 thead.innerHTML = `
-                    <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
-                    <th class="p-3 font-bold text-slate-700 w-32">บุคลากร (Author)</th>
-                    <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
-                    <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
-                    <th class="p-3 font-bold text-slate-700 text-center w-24">Tier</th>
-                    <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
+                    <th class="p-3 font-bold text-slate-700 w-20 text-center bg-slate-50">ปี (Year)</th>
+                    <th class="p-3 font-bold text-slate-700 w-32 bg-slate-50">บุคลากร (Author)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/3 bg-slate-50">ชื่อผลงาน (Title)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/4 bg-slate-50">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
+                    <th class="p-3 font-bold text-slate-700 text-center w-24 bg-slate-50">Tier</th>
+                    <th class="p-3 font-bold text-slate-700 bg-slate-50">อ้างอิง (Citation) & URL</th>
                 `;
             } else {
                 title.textContent = 'รายการผลงานตีพิมพ์รายบุคคล';
                 subtitle.textContent = `แสดงผลงานของ: ${selectedAuthor}`;
                 thead.innerHTML = `
-                    <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
-                    <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
-                    <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
-                    <th class="p-3 font-bold text-slate-700 text-center w-24">Tier</th>
-                    <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
+                    <th class="p-3 font-bold text-slate-700 w-20 text-center bg-slate-50">ปี (Year)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/3 bg-slate-50">ชื่อผลงาน (Title)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/4 bg-slate-50">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
+                    <th class="p-3 font-bold text-slate-700 text-center w-24 bg-slate-50">Tier</th>
+                    <th class="p-3 font-bold text-slate-700 bg-slate-50">อ้างอิง (Citation) & URL</th>
                 `;
             }
 
             tbody.innerHTML = '';
 
-            if (data.length === 0) {
+            if (currentPubData.length === 0) {
                 const colSpan = selectedAuthor === 'All' ? 6 : 5;
                 tbody.innerHTML = `<tr><td colspan="${colSpan}" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลผลงาน</td></tr>`;
+                document.getElementById('pagination-controls').innerHTML = '';
                 return;
             }
 
-            const sortedData = [...data].sort((a, b) => b.year_be - a.year_be);
+            // --- คํานวณแบ่งหน้า (Pagination Slice) ---
+            let displayData = currentPubData;
+            if (!showAllPubs) {
+                const startIndex = (currentPubPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                displayData = currentPubData.slice(startIndex, endIndex);
+            }
 
-            sortedData.forEach(row => {
+            displayData.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-slate-100 last:border-none hover:bg-slate-50/70 transition-colors";
                 
@@ -1122,12 +1071,10 @@
                     linkHtml = `<a href="${url}" target="_blank" class="text-blue-500 hover:text-blue-700 underline text-xs break-all flex items-center gap-1 mt-2 w-fit"><i data-lucide="external-link" class="w-3 h-3"></i> DOI / Link</a>`;
                 }
                 
-                // --- 📌 สร้างป้าย (Badges) แบบหลายอัน หากเปเปอร์อยู่หลายฐานข้อมูล ---
                 let tierHtml = '<div class="flex flex-wrap gap-1">';
                 let rawTiers = (row.tier || '').split(',').map(t => t.trim().toUpperCase()).filter(t => t !== '' && t !== 'NA');
                 let typeStr = (row.type || '').toUpperCase();
                 
-                // ตรวจสอบว่ามีคำว่า PROCEEDING อยู่ในป้ายใดป้ายหนึ่งแล้วหรือยัง
                 if (typeStr.includes('PROCEEDING') && !rawTiers.some(t => t.includes('PROCEEDING'))) {
                     rawTiers.push('PROCEEDING');
                 }
@@ -1141,7 +1088,6 @@
                     else if (t.includes('PROCEEDING')) badgeClass = 'bg-indigo-100 text-indigo-700';
                     else if (t.includes('PUBMED') || t.includes('PMC')) badgeClass = 'bg-pink-100 text-pink-700';
 
-                    // จัดหน้าตาข้อความให้อ่านง่ายและไม่ยาวเกินไป
                     let displayText = t;
                     if (t === 'INTERNATIONAL PROCEEDING' || t === 'INT_PROCEEDING') displayText = 'Int. Proceeding';
                     else if (t === 'NATIONAL PROCEEDING' || t === 'NAT_PROCEEDING') displayText = 'Nat. Proceeding';
@@ -1154,7 +1100,6 @@
                 });
                 tierHtml += '</div>';
 
-                // เพิ่มคอลัมน์ผู้แต่ง ถ้าดูภาพรวมของทุกคน
                 let authorCellHtml = selectedAuthor === 'All' 
                     ? `<td class="p-4 align-top font-bold text-indigo-600">${row.author || '-'}</td>` 
                     : '';
@@ -1178,13 +1123,77 @@
                 `;
                 tbody.appendChild(tr);
             });
-            
+
+            // สร้างปุ่มแบ่งหน้า
+            renderPaginationControls(currentPubData.length);
             lucide.createIcons();
+        }
+
+        // 📌 ฟังก์ชันคำนวณและวาดปุ่มควบคุมการแบ่งหน้า (Pagination Controls)
+        function renderPaginationControls(totalItems) {
+            const container = document.getElementById('pagination-controls');
+            if (!container) return;
+            
+            // ซ่อนเมนูแบ่งหน้าถ้าจำนวนเรื่องไม่ถึง 10 เรื่อง และไม่ได้กด "ดูทั้งหมด"
+            if (totalItems <= itemsPerPage && !showAllPubs) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            let html = `<div class="flex flex-col md:flex-row justify-between items-center gap-4 w-full text-sm">`;
+            
+            // ข้อความบอกจำนวณผลงานที่กำลังดูอยู่
+            const startItem = showAllPubs ? 1 : ((currentPubPage - 1) * itemsPerPage) + 1;
+            const endItem = showAllPubs ? totalItems : Math.min(currentPubPage * itemsPerPage, totalItems);
+            html += `<div class="text-slate-500 font-medium">
+                แสดงผลงานที่ <span class="text-slate-800 font-bold">${startItem} - ${endItem}</span> จาก <span class="text-slate-800 font-bold">${totalItems}</span> รายการ
+            </div>`;
+
+            // ปุ่มนำทางหน้า
+            html += `<div class="flex items-center gap-2">`;
+            if (!showAllPubs) {
+                html += `
+                    <button onclick="changePubPage(-1)" ${currentPubPage === 1 ? 'disabled' : ''} class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-medium shadow-sm bg-white flex items-center gap-1" title="หน้าก่อนหน้า">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    
+                    <span class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50 rounded-lg border border-slate-200 shadow-inner">
+                        หน้า ${currentPubPage} / ${totalPages}
+                    </span>
+                    
+                    <button onclick="changePubPage(1)" ${currentPubPage === totalPages ? 'disabled' : ''} class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-medium shadow-sm bg-white flex items-center gap-1" title="หน้าถัดไป">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                `;
+            }
+
+            // ปุ่มสลับโหมด แสดงทั้งหมด / แสดงทีละ 10
+            html += `
+                <button onclick="toggleShowAllPubs()" class="ml-2 px-3 py-1.5 rounded-lg ${showAllPubs ? 'text-indigo-600 bg-indigo-50 border border-indigo-200' : 'text-slate-600 bg-white border border-slate-200'} hover:bg-indigo-100 hover:text-indigo-700 transition-all font-bold shadow-sm flex items-center gap-2">
+                    <i data-lucide="${showAllPubs ? 'minimize-2' : 'maximize-2'}" class="w-4 h-4"></i>
+                    ${showAllPubs ? 'แบ่งหน้าละ 10' : 'ดูทั้งหมด'}
+                </button>
+            `;
+            html += `</div></div>`;
+            container.innerHTML = html;
+        }
+
+        function changePubPage(direction) {
+            currentPubPage += direction;
+            renderAuthorPublicationsTable();
+            document.getElementById('author-publications-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function toggleShowAllPubs() {
+            showAllPubs = !showAllPubs;
+            if (!showAllPubs) currentPubPage = 1;
+            renderAuthorPublicationsTable();
+            document.getElementById('author-publications-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function renderWordCloud(authorData) {
             const wordCounts = {};
-            
             authorData.forEach(d => {
                 if (d.keywords && d.keywords.length > 0) {
                     d.keywords.forEach(kw => {
@@ -1234,12 +1243,10 @@
             });
         }
 
-        // ฟังก์ชันวาดเครือข่าย Co-Authorship
         function renderCoAuthorNetwork(authorData) {
             const nodeFreq = {};
             const edgeMap = {};
 
-            // ดึงชื่อผู้แต่งจาก Citation
             authorData.forEach(d => {
                 if (d.citation && d.citation.length > 10 && d.citation !== '-') {
                     const match = d.citation.match(/^(.*?)\s*\(\d{4}\)/);
@@ -1263,10 +1270,7 @@
                 }
             });
 
-            // กำหนด Limit ให้สัมพันธ์กับตัวกรอง
-            // ถ้าดูทุกคน ให้โชว์ Top 150 เพื่อให้เห็นอาจารย์ครบถ้วนขึ้น, ถ้าดูรายบุคคลให้โชว์ Top 40
             let displayLimit = selectedAuthor === 'All' ? 150 : 40; 
-
             let topAuthors = Object.entries(nodeFreq)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, displayLimit)
@@ -1276,7 +1280,7 @@
             const container = document.getElementById('coauthor-network-container');
 
             if (topAuthors.length <= 1) {
-                container.innerHTML = '<div class="text-slate-400 font-medium h-full flex items-center justify-center">ไม่มีข้อมูลอ้างอิง (Citation) เพียงพอสำหรับสร้างเครือข่ายผู้แต่งร่วม</div>';
+                container.innerHTML = '<div class="text-slate-400 font-medium h-full flex items-center justify-center">ไม่มีข้อมูลอ้างอิงเพียงพอสำหรับสร้างเครือข่ายผู้แต่งร่วม</div>';
                 return;
             } else {
                 container.innerHTML = '';
@@ -1317,7 +1321,7 @@
             const options = {
                 nodes: {
                     shape: 'dot',
-                    scaling: { min: 8, max: 35 }, // ลดขนาดจุดต่ำสุดลงนิดหน่อย เผื่อจุดมีเยอะ
+                    scaling: { min: 8, max: 35 }, 
                     font: { size: 12, face: 'Sarabun', color: '#334155', strokeWidth: 2, strokeColor: '#ffffff' },
                     borderWidth: 2,
                     shadow: true
@@ -1330,17 +1334,13 @@
                 interaction: { hover: true, tooltipDelay: 100, zoomView: true }
             };
 
-            if (coAuthorNetworkInstance) {
-                coAuthorNetworkInstance.destroy();
-            }
+            if (coAuthorNetworkInstance) coAuthorNetworkInstance.destroy();
             coAuthorNetworkInstance = new vis.Network(container, data, options);
         }
 
-        // --- 📌 ฟังก์ชันจัดการแชร์ลง Social Network ---
         function shareToSocial(platform) {
             const currentUrl = window.location.href;
             const title = "ข้อมูลสรุปผลงานตีพิมพ์ทางวิชาการ (Publications Dashboard)";
-            
             let shareUrl = "";
             switch (platform) {
                 case 'facebook':
@@ -1353,13 +1353,9 @@
                     shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(currentUrl)}`;
                     break;
             }
-            
-            if (shareUrl) {
-                window.open(shareUrl, '_blank', 'width=600,height=400');
-            }
+            if (shareUrl) window.open(shareUrl, '_blank', 'width=600,height=400');
         }
 
-        // --- 📌 คัดลอกลิงก์ไปยัง Clipboard ---
         function copyCurrentLink() {
             const tempInput = document.createElement("input");
             tempInput.value = window.location.href;
@@ -1367,9 +1363,7 @@
             tempInput.select();
             
             try {
-                // ใช้ document.execCommand เพื่อรองรับในระบบ iFrame ได้อย่างมีประสิทธิภาพสูงสุด
                 document.execCommand('copy');
-                
                 const copyBtnText = document.getElementById('copy-btn-text');
                 copyBtnText.textContent = 'คัดลอกแล้ว!';
                 copyBtnText.classList.add('text-emerald-600');
@@ -1385,9 +1379,29 @@
             }
         }
 
-        // --- 📌 ฟังก์ชันจำลองสถิติการเข้าชม ---
+        // 📌 ฟังก์ชันส่งออกตารางผลงานจริงทั้งหมด (ไม่โดนจำกัดด้วยหน้าการแบ่งหน้า)
+        function exportTableExcel() {
+            if (currentPubData.length === 0) return;
+            
+            // เตรียมข้อมูลโดยดึงจาก Array ข้อมูลจริงที่ผ่านการกรอง (เพื่อให้ได้ผลงานทั้งหมดครบทุกเรื่อง)
+            const dataToExport = currentPubData.map(row => ({
+                'ปีการศึกษา (Year BE)': row.year_be,
+                'ผู้แต่ง (Author)': row.author,
+                'ชื่อผลงาน (Title)': row.title,
+                'วารสาร/แหล่งตีพิมพ์ (Journal)': row.pub_name,
+                'ฐานข้อมูล (Tier)': row.tier,
+                'การอ้างอิง (Citation)': row.citation,
+                'DOI / Link': row.urlDoi
+            }));
+            
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Publications");
+            
+            XLSX.writeFile(workbook, `publications_${selectedAuthor}_${new Date().toLocaleDateString()}.xlsx`);
+        }
+
         function initVisitorCounter() {
-            // จำลองคนออนไลน์แบบสุ่ม 1-5 คน เปลี่ยนแปลงทุกๆ 8 วินาที
             const updateOnline = () => {
                 const onlineCount = Math.floor(Math.random() * 5) + 1;
                 document.getElementById('count-online').textContent = onlineCount;
@@ -1395,7 +1409,6 @@
             updateOnline();
             setInterval(updateOnline, 8000);
 
-            // เก็บประวัติการเข้าชมไว้ในเครื่องผู้ใช้ (Local Storage) เพื่อให้ตัวเลขดูวิ่งขึ้นจริงเวลาทดสอบ
             let visits = JSON.parse(localStorage.getItem('dashboard_mock_visits')) || { 
                 today: 24, 
                 year: 845, 
@@ -1403,29 +1416,25 @@
                 date: new Date().toDateString() 
             };
             
-            // ถัาขึ้นวันใหม่ ให้รีเซ็ตยอดของวันนี้
             if (visits.date !== new Date().toDateString()) {
                 visits.today = 0;
                 visits.date = new Date().toDateString();
             }
             
-            // บวกเพิ่มยอดทุกครั้งที่มีคน(หรือเรา)โหลดหน้าเว็บ
             visits.today += 1;
             visits.year += 1;
             visits.total += 1;
             
             localStorage.setItem('dashboard_mock_visits', JSON.stringify(visits));
 
-            // นำตัวเลขไปแสดงผล พร้อมใส่ลูกน้ำ (Comma)
             document.getElementById('count-today').textContent = visits.today.toLocaleString();
             document.getElementById('count-year').textContent = visits.year.toLocaleString();
             document.getElementById('count-total').textContent = visits.total.toLocaleString();
         }
 
-        // เริ่มโหลดข้อมูลเมื่อหน้าเว็บพร้อม
         document.addEventListener('DOMContentLoaded', () => {
             initApp();
-            initVisitorCounter(); // เรียกใช้ฟังก์ชันนับสถิติ
+            initVisitorCounter();
             
             const yearElem = document.getElementById('current-year');
             if (yearElem) {
