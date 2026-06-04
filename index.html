@@ -14,7 +14,7 @@
     
     <!-- ลิงก์รูปภาพพรีวิวที่จะให้แสดงตอนแชร์ (แนะนำขนาด 1200x630px และต้องเป็นลิงก์แบบ Absolute URL เต็มรูปแบบ) -->
     <!-- คุณสามารถอัปโหลดรูปพรีวิว (เช่นภาพ mockup แดชบอร์ดสวยๆ) ไว้บน GitHub แล้วนำลิงก์รูปมาใส่ตรงนี้ได้เลยครับ -->
-    <meta property="og:image" content="https://github.com/anuwatpe/cph-publications/blob/main/cover-preview.png?raw=true" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/anuwatpe/cph-publications/main/cover-preview.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
 
@@ -71,6 +71,9 @@
         /* ซ่อน Scrollbar ของตารางแต่ยังไถเลื่อนได้ */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* เพิ่ม Smooth Scroll และระยะเว้นด้านบนสำหรับ Sticky Menu */
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 p-6">
@@ -83,6 +86,22 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
         
+        <!-- 📌 แท็บเมนูนำทาง (Navigator Menu) -->
+        <nav class="sticky top-0 z-40 bg-slate-50/90 backdrop-blur-md py-3 border-b border-slate-200 flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6 sm:mx-0 sm:px-0">
+            <a href="#dashboard-overview" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม
+            </a>
+            <a href="#summary-table" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
+                <i data-lucide="table" class="w-4 h-4"></i> สรุปสถิติ
+            </a>
+            <a href="#author-publications-section" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
+                <i data-lucide="book-marked" class="w-4 h-4"></i> รายการผลงาน
+            </a>
+            <a href="#network-analysis" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm border border-slate-200 bg-white whitespace-nowrap">
+                <i data-lucide="network" class="w-4 h-4"></i> เครือข่าย & คำสำคัญ
+            </a>
+        </nav>
+
         <!-- Header & Filters -->
         <div class="flex flex-col gap-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-4">
@@ -211,7 +230,7 @@
         </div>
 
         <!-- Stats Cards (Vibrant Gradients) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+        <div id="dashboard-overview" class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div class="rounded-2xl p-5 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
                 <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
                     <i data-lucide="file-text" class="w-7 h-7"></i>
@@ -274,7 +293,7 @@
         </div>
 
         <!-- Tier Summary Table -->
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden relative">
+        <div id="summary-table" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden relative">
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">สรุปจำนวนการตีพิมพ์ผลงานทางวิชาการ</h2>
@@ -333,10 +352,10 @@
         </div>
 
         <!-- Individual Publications Table -->
-        <div id="author-publications-section" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden hidden transition-all">
+        <div id="author-publications-section" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 overflow-hidden transition-all">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800">รายการผลงานตีพิมพ์รายบุคคล</h2>
+                    <h2 id="author-publications-title" class="text-lg font-bold text-slate-800">รายการผลงานตีพิมพ์รายบุคคล</h2>
                     <p id="author-publications-subtitle" class="text-sm text-slate-500 mt-1">แสดงผลงานทั้งหมดของบุคลากรที่เลือก</p>
                 </div>
                 <!-- 📌 ปุ่ม Export Excel -->
@@ -347,12 +366,8 @@
             <div class="overflow-x-auto pb-4 hide-scrollbar">
                 <table class="w-full text-left text-sm border-collapse min-w-[800px]" id="author-publications-table">
                     <thead>
-                        <tr class="border-b-2 border-slate-200 bg-slate-50">
-                            <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
-                            <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
-                            <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
-                            <th class="p-3 font-bold text-slate-700 text-center w-24">Tier</th>
-                            <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
+                        <tr id="author-publications-head" class="border-b-2 border-slate-200 bg-slate-50">
+                            <!-- หัวตารางจะถูกแทรกด้วย JS อัตโนมัติ -->
                         </tr>
                     </thead>
                     <tbody id="author-publications-body">
@@ -363,7 +378,7 @@
         </div>
 
         <!-- Word Cloud Section -->
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-6">
+        <div id="network-analysis" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-6 mb-6">
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">วิเคราะห์คำสำคัญ (Keywords)</h2>
@@ -1054,21 +1069,43 @@
         function renderAuthorPublicationsTable(data) {
             const section = document.getElementById('author-publications-section');
             const tbody = document.getElementById('author-publications-body');
+            const thead = document.getElementById('author-publications-head');
             const subtitle = document.getElementById('author-publications-subtitle');
+            const title = document.getElementById('author-publications-title');
             
-            if (!section || !tbody) return;
+            if (!section || !tbody || !thead) return;
+
+            // ไม่ซ่อนตารางแล้วแม้จะเลือกทุกคน
+            section.classList.remove('hidden');
 
             if (selectedAuthor === 'All') {
-                section.classList.add('hidden');
-                return;
+                title.textContent = 'รายการผลงานตีพิมพ์ทั้งหมด';
+                subtitle.textContent = 'แสดงผลงานทั้งหมดของบุคลากรทุกคน';
+                thead.innerHTML = `
+                    <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
+                    <th class="p-3 font-bold text-slate-700 w-32">บุคลากร (Author)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
+                    <th class="p-3 font-bold text-slate-700 text-center w-24">Tier</th>
+                    <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
+                `;
+            } else {
+                title.textContent = 'รายการผลงานตีพิมพ์รายบุคคล';
+                subtitle.textContent = `แสดงผลงานของ: ${selectedAuthor}`;
+                thead.innerHTML = `
+                    <th class="p-3 font-bold text-slate-700 w-20 text-center">ปี (Year)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/3">ชื่อผลงาน (Title)</th>
+                    <th class="p-3 font-bold text-slate-700 w-1/4">วารสาร/แหล่งตีพิมพ์ (Journal)</th>
+                    <th class="p-3 font-bold text-slate-700 text-center w-24">Tier</th>
+                    <th class="p-3 font-bold text-slate-700">อ้างอิง (Citation) & URL</th>
+                `;
             }
 
-            section.classList.remove('hidden');
-            subtitle.textContent = `แสดงผลงานของ: ${selectedAuthor}`;
             tbody.innerHTML = '';
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลผลงาน</td></tr>';
+                const colSpan = selectedAuthor === 'All' ? 6 : 5;
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="py-12 text-center text-slate-400 font-medium">ไม่มีข้อมูลผลงาน</td></tr>`;
                 return;
             }
 
@@ -1091,7 +1128,6 @@
                 let typeStr = (row.type || '').toUpperCase();
                 
                 // ตรวจสอบว่ามีคำว่า PROCEEDING อยู่ในป้ายใดป้ายหนึ่งแล้วหรือยัง
-                // ถ้ายังไม่มี และประเภทผลงานคือ Proceeding ค่อยเพิ่มป้ายเข้าไป
                 if (typeStr.includes('PROCEEDING') && !rawTiers.some(t => t.includes('PROCEEDING'))) {
                     rawTiers.push('PROCEEDING');
                 }
@@ -1110,7 +1146,6 @@
                     if (t === 'INTERNATIONAL PROCEEDING' || t === 'INT_PROCEEDING') displayText = 'Int. Proceeding';
                     else if (t === 'NATIONAL PROCEEDING' || t === 'NAT_PROCEEDING') displayText = 'Nat. Proceeding';
                     else if (t === 'PROCEEDING') {
-                        // ถ้าระบุแค่ PROCEEDING เฉยๆ ให้ดึง Level มาช่วยแสดงผล
                         const levelStr = (row.level || '').toUpperCase();
                         displayText = levelStr === 'INTERNATIONAL' ? 'Int. Proceeding' : 'Nat. Proceeding';
                     }
@@ -1119,8 +1154,14 @@
                 });
                 tierHtml += '</div>';
 
+                // เพิ่มคอลัมน์ผู้แต่ง ถ้าดูภาพรวมของทุกคน
+                let authorCellHtml = selectedAuthor === 'All' 
+                    ? `<td class="p-4 align-top font-bold text-indigo-600">${row.author || '-'}</td>` 
+                    : '';
+
                 tr.innerHTML = `
                     <td class="p-4 text-center text-slate-700 font-bold align-top bg-slate-50/30">${row.year_be}</td>
+                    ${authorCellHtml}
                     <td class="p-4 text-slate-800 font-medium align-top leading-relaxed pr-6">${row.title}</td>
                     <td class="p-4 align-top leading-relaxed pr-4">
                         <span class="bg-indigo-50 border border-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-semibold inline-block mb-1">
